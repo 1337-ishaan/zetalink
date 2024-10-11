@@ -11,6 +11,7 @@ const StyledButtonWrapper = styled.button`
     background: #fff;
     transform: scale(1.1);
     transition: all 0.3s;
+    border: none;
   }
   &:disabled {
     transform: unset;

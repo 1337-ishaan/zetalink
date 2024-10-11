@@ -91,6 +91,10 @@ const HeaderWrapper = styled(FlexRowWrapper)`
      display:flex;
      column-gap:8px;
      align-items:center;
+     &:hover{
+      // transform: none;
+      // outline:none;
+     }
      }
   `;
 
