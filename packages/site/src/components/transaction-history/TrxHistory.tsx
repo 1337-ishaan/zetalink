@@ -141,7 +141,7 @@ const TrxHistory: React.FC = () => {
       (t: any) =>
         t.scriptpubkey_address ===
           'tb1qy9pqmk2pd9sv63g27jt8r657wy0d9ueeh0nqur' ||
-        t.scriptpubkey_address === 'tb1qex3zpp07a0ctu8x00ah4mnyess0900a2dklttr',
+        t.scriptpubkey_address === globalState?.btcAddress,
     )?.value;
   };
 

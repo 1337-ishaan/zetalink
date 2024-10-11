@@ -25,23 +25,23 @@ import { btcToSats, satsToBtc } from './utils/satConverter';
 
 let isMainnet = false;
 /**
- * Converts an Ethereum btcAddress to a Zeta btcAddress and vice versa.
- * @param btcAddress - The Ethereum or Zeta btcAddress to convert.
- * @returns The converted btcAddress in Zeta format or Ethereum format.
+ * Converts an Ethereum address to a Zeta address and vice versa.
+ * @param address - The Ethereum or Zeta address to convert.
+ * @returns The converted address in Zeta format or Ethereum format.
  */
-const convertToZeta = (btcAddress: string): string => {
+const convertToZeta = (address: string): string => {
   try {
-    if (btcAddress.startsWith('0x')) {
-      const data = Buffer.from(trimHexPrefix(btcAddress), 'hex');
+    if (address.startsWith('0x')) {
+      const data = Buffer.from(trimHexPrefix(address), 'hex');
       return bech32.encode('zeta', bech32.toWords(data));
     } else {
-      const decoded = bech32.decode(btcAddress);
+      const decoded = bech32.decode(address);
       return (
         '0x' + Buffer.from(bech32.fromWords(decoded.words)).toString('hex')
       );
     }
   } catch (error) {
-    console.error('Error converting btcAddress to Zeta:', error);
+    console.error('Error converting EVM address to Zeta:', error);
     throw new Error('Conversion to Zeta failed.');
   }
 };
@@ -56,8 +56,8 @@ export const trimHexPrefix = (key: string): string => {
 };
 
 /**
- * Creates a Bitcoin testnet btcAddress from the BIP32 public key.
- * @returns The generated Bitcoin testnet btcAddress.
+ * Creates a Bitcoin testnet address from the BIP32 public key.
+ * @returns The generated Bitcoin testnet address.
  */
 export const deriveBtcWallet = async (request: any): Promise<string> => {
   isMainnet = request.params[0]!;
@@ -81,11 +81,11 @@ export const deriveBtcWallet = async (request: any): Promise<string> => {
       });
       return btcAddress as string;
     } else {
-      throw new Error('Failed to create Bitcoin testnet btcAddress.');
+      throw new Error('Failed to create Bitcoin testnet address.');
     }
   } catch (error) {
-    console.error('Error creating BTC testnet btcAddress:', error);
-    throw new Error('Failed to create Bitcoin testnet btcAddress.');
+    console.error('Error creating Bitcoin testnet address:', error);
+    throw new Error('Failed to create Bitcoin testnet address.');
   }
 };
 
@@ -120,7 +120,7 @@ export const getBtcTrxs = async () => {
 
       return utxoData ?? [];
     } else {
-      throw new Error('Failed to create Bitcoin testnet btcAddress.');
+      throw new Error('Failed to create Bitcoin testnet address.');
     }
   } catch (error) {
     console.error('Error getting BTC UTXOs:', error);
@@ -497,8 +497,8 @@ export const trackCctxTx = async (request: any) => {
 };
 
 /**
- * Retrieves the balance for a given btcAddress and exchange_rate.
- * @param request - The request object containing the btcAddress.
+ * Retrieves the balance for a given EVM address and exchange_rate.
+ * @param request - The request object containing the EVM address.
  * @returns An object containing Zeta, non-Zeta balances and prices.
  */
 export const getBalanceAndRate = async (request: any) => {
@@ -536,7 +536,7 @@ export const getBalanceAndRate = async (request: any) => {
         btcPrice,
       };
     } else {
-      throw new Error('btcAddress parameter is missing.');
+      throw new Error('Some parameters are missing.');
     }
   } catch (error) {
     console.error('Error getting Zeta balance:', error);

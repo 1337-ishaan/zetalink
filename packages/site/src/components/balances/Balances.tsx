@@ -35,7 +35,7 @@ interface ZetaBalance {
 }
 
 interface ZetaBalanceResponse {
-  nonZeta: NonZetaToken[];
+  nonZeta: NonZetaToken[] | { message?: string };
   zeta: {
     balances: ZetaBalance[];
   };
@@ -119,19 +119,22 @@ const Balances = ({}: BalancesProps): JSX.Element => {
           )) as ZetaBalanceResponse;
           console.log(result, 'result balance');
 
-          const maps: BalanceData[] = result?.nonZeta?.map((t) => ({
-            label: t.token.symbol,
-            usdPrice:
-              new BigNumber(t?.value)
-                .dividedBy(t?.token?.symbol === 'tBTC' ? 1e8 : 1e18)
-                .toNumber() * +t.token.exchange_rate! ?? 0,
-            icon_url: t.token.icon_url ?? '',
-            value: new BigNumber(t?.value)
-              .dividedBy(t?.token?.symbol === 'tBTC' ? 1e8 : 1e18)
-              .toNumber(),
-          }));
+          const maps: BalanceData[] = Array.isArray(result.nonZeta)
+            ? result.nonZeta.map((t) => ({
+                label: t.token.symbol,
+                usdPrice:
+                  new BigNumber(t?.value)
+                    .dividedBy(t?.token?.symbol === 'tBTC' ? 1e8 : 1e18)
+                    .toNumber() * +t.token.exchange_rate! ?? 0,
+                icon_url: t.token.icon_url ?? '',
+                value: new BigNumber(t?.value)
+                  .dividedBy(t?.token?.symbol === 'tBTC' ? 1e8 : 1e18)
+                  .toNumber(),
+              }))
+            : [];
 
           if (
+            Array.isArray(result.nonZeta) &&
             result.zeta.balances.length === 0 &&
             result.nonZeta.length === 0
           ) {
@@ -154,8 +157,12 @@ const Balances = ({}: BalancesProps): JSX.Element => {
               },
               ...maps,
               {
-                label: result.zeta.balances[0]?.denom!,
-                value: result.zeta.balances[0]?.amount! / 1e18,
+                label: result?.zeta?.balances[0]?.denom
+                  ? result.zeta.balances[0]?.denom!
+                  : 'ZETA',
+                value: result?.zeta?.balances[0]?.amount
+                  ? result.zeta.balances[0]?.amount! / 1e18
+                  : 0,
                 usdPrice:
                   (result.zeta.balances[0]?.amount! / 1e18) * result.zetaPrice,
               },
@@ -184,7 +191,7 @@ const Balances = ({}: BalancesProps): JSX.Element => {
       setSearched(data);
     }
   };
-
+  console.log(data, 'data');
   return (
     <BalancesWrapper>
       <Typography size={24}>
@@ -205,7 +212,7 @@ const Balances = ({}: BalancesProps): JSX.Element => {
       </Typography>
 
       <FlexColumnWrapper className="balance-pie-container">
-        {data.length >= 2 && data[0]!.value + data[1]!.value > 0 ? (
+        {data.length > 0 ? (
           <>
             <div className="input-container">
               <input
@@ -214,7 +221,7 @@ const Balances = ({}: BalancesProps): JSX.Element => {
                 className="searched-input"
               />
             </div>
-            {error && (
+            {error && data.length === 0 && (
               <div className="error-message">
                 "Error loading balances, {error + ''}
               </div>
