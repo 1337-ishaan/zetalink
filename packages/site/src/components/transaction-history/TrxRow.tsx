@@ -83,7 +83,6 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount }) => {
     setIsCctxModalOpen(true);
 
     try {
-      console.log(trxHash, 'cctx trxHash');
       const cctxData: any = await trackCctx(trxHash);
 
       if (!!cctxData) {
@@ -95,7 +94,6 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount }) => {
       console.error('Error tracking cross-chain transaction:', error);
     }
   };
-  console.log(cctxError, 'cctx in trxrow');
   return (
     <>
       <TrxRowWrapper

@@ -111,7 +111,6 @@ const TrxHistory: React.FC = () => {
         try {
           const results: any = await getBtcTrxs();
           const utxo: any = await getBtcUtxo();
-          console.log(utxo, 'utxo');
           setGlobalState({
             ...globalState,
             btcTrxs: results,
@@ -133,8 +132,6 @@ const TrxHistory: React.FC = () => {
     globalState?.isMainnet,
     setGlobalState,
   ]);
-
-  console.log(globalState?.btcTrxs, 'globalState?.btcTrxs');
 
   const getAmount = (trx: any) => {
     return trx?.vout?.find(

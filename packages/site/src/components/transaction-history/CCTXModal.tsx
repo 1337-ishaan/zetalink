@@ -5,6 +5,7 @@ import CctxItem from './CctxItem';
 import { ReactComponent as CrossIcon } from '../../assets/cross.svg';
 import CctxFailure from '../../assets/failure-image.png';
 import Loader from '../utils/Loader';
+import InfoBox from '../utils/InfoBox';
 
 const CCTXModalWrapper = styled.div`
   position: relative;
@@ -31,7 +32,7 @@ const customStyles = {
     alignItems: 'center',
     background: '#141417',
     padding: '16px',
-    width: '400px',
+    width: '300px',
     transition: '.5s all',
   },
 };
@@ -67,7 +68,7 @@ const CCTXModal = ({
             <img
               className="failure-image"
               style={{
-                width: '50%',
+                width: '40%',
                 margin: 'auto',
                 justifyContent: 'center',
                 display: 'flex',
@@ -75,10 +76,12 @@ const CCTXModal = ({
               src={CctxFailure}
             />
             <Typography size={16}>{cctxError}</Typography>
-
-            <Typography size={12} color="yellow">
+            <br />
+            {/* <Typography size={12} color="yellow"> */}
+            <InfoBox color="red">
               Make sure that the Bitcoin transaction has 6+ confirmations
-            </Typography>
+            </InfoBox>
+            {/* </Typography> */}
           </>
         ) : (
           <>{!cctx?.index ? <Loader /> : <CctxItem cctx={cctx} />}</>

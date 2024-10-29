@@ -117,7 +117,6 @@ const Balances = ({}: BalancesProps): JSX.Element => {
           const result = (await getBalanceAndRate(
             globalState.evmAddress as string,
           )) as ZetaBalanceResponse;
-          console.log(result, 'result balance');
 
           const maps: BalanceData[] = Array.isArray(result.nonZeta)
             ? result.nonZeta.map((t) => ({
@@ -178,8 +177,6 @@ const Balances = ({}: BalancesProps): JSX.Element => {
     }
   }, [globalState?.evmAddress, globalState?.utxo]);
 
-  console.log(data, 'data');
-
   const handleSearch = (text: string) => {
     const searchText = DOMPurify.sanitize(text);
     if (data.length > 0 && searchText) {
@@ -191,7 +188,6 @@ const Balances = ({}: BalancesProps): JSX.Element => {
       setSearched(data);
     }
   };
-  console.log(data, 'data');
   return (
     <BalancesWrapper>
       <Typography size={24}>

@@ -186,7 +186,6 @@ const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
     }
   }, []);
 
-  console.log(depositFees, 'deposit fees');
   const CustomItemRenderer = ({ option }: any) => (
     <div className="dropdown-item">
       <div className="icon-symbol-wrapper">

@@ -134,17 +134,17 @@ export const getBtcTrxs = async () => {
  */
 export const getFees = async () => {
   try {
-    const utxo = await fetch(
-      `${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/v1/fees/recommended`,
-      // `${isMainnet ? MAINNET_BLOCKCYPHER_API : TESTNET_BLOCKCYPHER_API}`,
+    const fee = await fetch(
+      // `${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/v1/fees/recommended`,
+      `${isMainnet ? MAINNET_BLOCKCYPHER_API : TESTNET_BLOCKCYPHER_API}`,
     );
-    if (!utxo.ok) {
+    if (!fee.ok) {
       throw new Error('Failed to fetch depositFees.');
     }
-    const utxoData = await utxo.json();
+    const feeData = await fee.json();
     return {
-      btcFees: utxoData.fastestFee * 2.4,
-      zetaDepositFees: utxoData.fastestFee * 68 * 2,
+      btcFees: feeData.high_fee_per_kb,
+      zetaDepositFees: feeData.high_fee_per_kb * 0.001 * 68 * 2,
     }; // zetachain's deposit fee = (high_fee_per_kb * 0.001)sat/vB * 68 sat/vB * 2
   } catch (error) {
     console.error('Error getting depositFees:', error);
@@ -218,7 +218,7 @@ export const fetchUtxo = async () => {
           : bitcoin.networks.testnet,
       });
       const utxo = await fetch(
-        `${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/address/${btcAddress}/utxo`,
+        `${isMainnet ? MAINNET_BLOCKSTREAM_API : TESTNET_BLOCKSTREAM_API}/address/${btcAddress}/utxo`,
       );
 
       const utxoData = await utxo.json();
@@ -258,7 +258,7 @@ export const transactBtc = async (request: any) => {
           <Text>Transfer Amount - {'' + transferAmountRaw} BTC</Text>
           <Text>ZRC20 Contract Address - {'' + ZRC20ContractAddress}</Text>
           <Text>Recipient Address - {'' + recipientAddress}</Text>
-          <Text>Deposit Fees - {'' + depositFeeRaw} BTC</Text>
+          <Text>Deposit Fees - {'' + satsToBtc(depositFeeRaw)} BTC</Text>
         </Box>
       ),
     },
@@ -279,18 +279,6 @@ export const transactBtc = async (request: any) => {
   if (result) {
     const depositFee: { zetaDepositFees: number; btcFees: number } =
       await getFees();
-
-    await snap.request({
-      method: 'snap_dialog',
-      params: {
-        type: 'alert',
-        content: (
-          <Box>
-            <Heading>{JSON.stringify(depositFee)}</Heading>
-          </Box>
-        ),
-      },
-    });
 
     const transferAmount =
       Math.floor(btcToSats(parseFloat(transferAmountRaw))) - 1; // subtracting 1 to account for depositFees
@@ -407,7 +395,7 @@ export const transactBtc = async (request: any) => {
 
       psbt.addOutput({
         address: isMainnet ? MAINNET_ZETA_TSS : TESTNET_ZETA_TSS,
-        value: transferAmount + depositFee.zetaDepositFees,
+        value: Math.floor(transferAmount + depositFee.zetaDepositFees),
       });
 
       if (memoBuffer.length > 0) {
@@ -425,9 +413,6 @@ export const transactBtc = async (request: any) => {
       for (let i = 0; i < pickUtxos.length; i++) {
         const utxo = pickUtxos[i];
         const tx = txs[i];
-        if (!tx || !tx.vout || !tx.vout[utxo.vout]) {
-          throw new Error(`Invalid transaction data for UTXO ${utxo.txid}`);
-        }
 
         const inputData = {
           hash: tx.txid,
@@ -439,7 +424,6 @@ export const transactBtc = async (request: any) => {
         };
         psbt.addInput(inputData as any);
       }
-
       for (let i = 0; i < pickUtxos.length; i++) {
         psbt.signInput(i, keypair);
       }
@@ -504,11 +488,13 @@ export const trackCctxTx = async (request: any) => {
 export const getBalanceAndRate = async (request: any) => {
   try {
     if (request.params[0]) {
-      const evmAddress = convertToZeta(request.params[0]);
+      const zetaAddr = convertToZeta(request.params[0]);
 
       const zeta = await fetch(
-        `${isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI}/public/cosmos/bank/v1beta1/spendable_balances/${evmAddress}`,
+        // 'https://zetachain-athens.blockpi.network/lcd/v1/public/cosmos/bank/v1beta1/spendable_balances/zeta1wzv3cgx8cnsqy8hsh5mgtpmvcwk9y50seg8g8t',
+        `${isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI}/public/cosmos/bank/v1beta1/balances/${zetaAddr}`,
       );
+
       const nonZeta = await fetch(
         `${isMainnet ? MAINNET_ZETA_BLOCKSCOUT : TESTNET_ZETA_BLOCKSCOUT}/addresses/${request.params[0]}/token-balances`,
       );
@@ -530,8 +516,8 @@ export const getBalanceAndRate = async (request: any) => {
       const nonZetaData = await nonZeta.json();
 
       return {
-        zeta: zetaData,
-        nonZeta: nonZetaData,
+        zeta: zetaData ?? {},
+        nonZeta: nonZetaData ?? {},
         zetaPrice,
         btcPrice,
       };

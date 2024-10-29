@@ -154,7 +154,6 @@ const Header = ({}: HeaderProps): JSX.Element => {
     }
   };
 
-  console.log(state, 'is snap installed');
   return (
     <HeaderWrapper>
       <div className="logo-wrapper">
