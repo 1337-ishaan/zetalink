@@ -46,7 +46,8 @@
     "spinnies": "0.5.1",
     "webpack": "5.93.0",
     "webpack-cli": "5.1.4",
-    "ws": "8.17.1"
+    "ws": "8.17.1",
+    "zetalink": "workspace:^"
   },
   "devDependencies": {
     "@metamask/eslint-config": "^13.0.0",
