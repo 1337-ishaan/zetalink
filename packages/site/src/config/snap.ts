@@ -8,5 +8,5 @@
  */
 export const defaultSnapOrigin =
   // eslint-disable-next-line no-restricted-globals
-  `local:http://localhost:8080`;
-  // `npm:zetalink`;
+  // `local:http://localhost:8080`;
+  `npm:zetalink`;
