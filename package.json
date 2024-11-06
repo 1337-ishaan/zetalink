@@ -91,7 +91,9 @@
     "allowScripts": {
       "@lavamoat/preinstall-always-fail": false,
       "sharp": true,
-      "@metamask/snaps-cli>@swc/core": false
+      "@metamask/snaps-cli>@swc/core": false,
+      "zetalink>bip32>tiny-secp256k1": false,
+      "zetalink>bitcoinjs-message>secp256k1": false
     }
   }
 }

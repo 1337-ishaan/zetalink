@@ -65,14 +65,14 @@ const SocialLinks = ({
       <a
         className="social"
         rel="noopener noreferrer"
-        href="https://www.youtube.com/@ZetaLink"
+        href="https://www.youtube.com/watch?v=kpI7xZGap9I&list=PLABva2APwohYN5wiyL9qmv3MivbUvVfUb"
       >
         <YoutubeLogo className="social-logo" />
       </a>
       <a
         className="social"
         rel="noopener noreferrer"
-        href="https://x.com/ZetaLink"
+        href="https://x.com/zetalinksnap"
       >
         <XLogo className="social-logo" />
       </a>
