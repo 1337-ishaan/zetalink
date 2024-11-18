@@ -16,7 +16,7 @@ import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
 import { toast } from 'react-toastify';
 import TooltipInfo from '../utils/TooltipInfo';
 import { StoreContext } from '../../hooks/useStore';
-import { ZETA_BLOCKPI_API_URL } from '../../constants/api';
+import { ZETA_MAINNET_BLOCKPI_API_URL, ZETA_TESTNET_BLOCKPI_API_URL } from '../../constants/api';
 import { satsToBtc } from '../../utils/satConverter';
 
 const SendWrapper = styled.div`
@@ -163,7 +163,7 @@ const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
   const getZrc20Assets = async () => {
     let assets = await axios.get(
       // TODO: make API_URL as constant
-      `${ZETA_BLOCKPI_API_URL}/zeta-chain/fungible/foreign_coins`,
+      `${globalState?.isMainnet ? ZETA_MAINNET_BLOCKPI_API_URL : ZETA_TESTNET_BLOCKPI_API_URL}/zeta-chain/fungible/foreign_coins`,
     );
     setZRC20Assets(assets.data.foreignCoins);
     return assets;
