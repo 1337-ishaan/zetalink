@@ -177,7 +177,7 @@ const broadcastTransaction = async (hex: string) => {
           <Box>
             <Heading>Track you CCTX transaction</Heading>
             <Link
-              href={`${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/tx/${txData}`}
+              href={`${isMainnet ? "https://mempool.space" : "https://mempool.space/testnet"}/tx/${txData}`}
             >
               Mempool
             </Link>
