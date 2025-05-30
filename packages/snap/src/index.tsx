@@ -1,4 +1,5 @@
 import type { OnRpcRequestHandler } from '@metamask/snaps-sdk';
+
 import {
   deriveBtcWallet,
   getBtcTrxs,
@@ -20,15 +21,15 @@ import {
  * @throws If the request method is not valid for this snap.
  */
 
-interface RpcRequest {
+type RpcRequest = {
   method: string;
   params?: any; // You can further specify this based on your expected parameters
-}
+};
 
-interface OnRpcRequestArgs {
+type OnRpcRequestArgs = {
   origin: string;
   request: RpcRequest;
-}
+};
 
 export const onRpcRequest: OnRpcRequestHandler = async ({
   origin,

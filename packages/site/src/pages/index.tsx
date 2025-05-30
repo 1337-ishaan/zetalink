@@ -1,27 +1,25 @@
 import { useContext } from 'react';
-import Header from '../components/header/Header';
 import styled from 'styled-components/macro';
-import TrxHistory from '../components/transaction-history/TrxHistory';
-import { defaultSnapOrigin } from '../config';
-import { MetaMaskContext } from '../hooks';
-import { isLocalSnap } from '../utils';
-import Transact from '../components/transact';
+
 import { ReactComponent as Logo } from '../assets/logo.svg';
 import Balances from '../components/balances/Balances';
-import FlexColumnWrapper from '../components/utils/wrappers/FlexColumnWrapper';
+import Header from '../components/header/Header';
 import Disconnected from '../components/screen/Disconnected';
-import FlexRowWrapper from '../components/utils/wrappers/FlexRowWrapper';
-import { StoreContext } from '../hooks/useStore';
+import Transact from '../components/transact';
+import TrxHistory from '../components/transaction-history/TrxHistory';
 import SocialLinks from '../components/utils/SocialLinks';
+import FlexColumnWrapper from '../components/utils/wrappers/FlexColumnWrapper';
+import FlexRowWrapper from '../components/utils/wrappers/FlexRowWrapper';
+import { defaultSnapOrigin } from '../config';
+import { MetaMaskContext } from '../hooks';
+import { StoreContext } from '../hooks/useStore';
+import { isLocalSnap } from '../utils';
 
 const AppWrapper = styled(FlexColumnWrapper)`
   padding: 16px 32px;
   margin: 0 auto;
   .action-balances-wrapper {
     column-gap: 24px;
-    @media (min-width: 1441px) {
-      margin-top: 10vh;
-    }
   }
  
 
@@ -55,7 +53,7 @@ const Index = () => {
     ? state.isFlask
     : state.installedSnap;
 
-  const isBtcAddressPresent = !!globalState?.btcAddress;
+  const isBtcAddressPresent = Boolean(globalState?.btcAddress);
   return (
     <AppWrapper
       style={{
@@ -66,7 +64,7 @@ const Index = () => {
     >
       <Logo className="page-bg-logo" />
       <Header />
-      {!!globalState?.btcAddress ? (
+      {globalState?.btcAddress ? (
         <FlexRowWrapper className="action-balances-wrapper">
           <FlexColumnWrapper className="trx-transact-wrapper">
             <SocialLinks />

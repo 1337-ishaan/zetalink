@@ -1,4 +1,5 @@
 import styled from 'styled-components/macro';
+
 import { ReactComponent as InfoIcon } from '../../assets/info.svg';
 
 const InfoBoxWrapper = styled.div<{ color?: string }>`
@@ -11,6 +12,7 @@ const InfoBoxWrapper = styled.div<{ color?: string }>`
   column-gap: 8px;
   font-size: 14px;
   color: #eee;
+  width: fit-content;
 
   .info-icon {
     max-width: 24px;
@@ -18,10 +20,10 @@ const InfoBoxWrapper = styled.div<{ color?: string }>`
   }
 `;
 
-interface InfoBoxProps {
+type InfoBoxProps = {
   children: JSX.Element | string;
   color?: string;
-}
+};
 
 const InfoBox = ({ children, color }: InfoBoxProps): JSX.Element => {
   return (

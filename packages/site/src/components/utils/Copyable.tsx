@@ -1,7 +1,8 @@
-import styled from 'styled-components/macro';
-import { ReactComponent as CopyIcon } from '../../assets/copy.svg';
-import { ReactComponent as CheckIcon } from '../../assets/check.svg';
 import { useState } from 'react';
+import styled from 'styled-components/macro';
+
+import { ReactComponent as CheckIcon } from '../../assets/check.svg';
+import { ReactComponent as CopyIcon } from '../../assets/copy.svg';
 import { trimHexAddress } from '../../utils/trimHexAddr';
 
 const CopyableWrapper = styled.div`
@@ -23,9 +24,9 @@ const CopyableWrapper = styled.div`
   }
 `;
 
-interface CopyableProps {
+type CopyableProps = {
   children: string;
-}
+};
 
 const Copyable = ({ children: address }: CopyableProps): JSX.Element => {
   const [isCopying, setIsCopying] = useState(false);

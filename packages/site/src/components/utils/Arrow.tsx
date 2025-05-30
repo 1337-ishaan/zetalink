@@ -1,4 +1,5 @@
 import styled from 'styled-components/macro';
+
 import { ReactComponent as ArrowIcon } from '../../assets/arrow.svg';
 
 const ArrowWrapper = styled(ArrowIcon)<{ isReceived: boolean }>`
@@ -11,11 +12,11 @@ const ArrowWrapper = styled(ArrowIcon)<{ isReceived: boolean }>`
   color: ${(props) => (props.isReceived ? '#008462' : '#ff4a3d')};
 `;
 
-interface ArrowProps {
+type ArrowProps = {
   isReceived?: boolean;
   onClick?: (event: React.MouseEvent<SVGSVGElement>) => void;
   className?: string;
-}
+};
 
 const Arrow = ({
   isReceived = false,

@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components/macro';
-import Typography from '../../components/utils/Typography';
+
+import Typography from '../utils/Typography';
 
 const EmptyBalanceWrapper = styled.div`
   display: flex;

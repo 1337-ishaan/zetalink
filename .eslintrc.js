@@ -17,10 +17,10 @@ module.exports = {
       files: ['*.ts', '*.tsx'],
       extends: ['@metamask/eslint-config-typescript'],
       rules: {
-        "@typescript-eslint/no-shadow": [
-          "error",
+        '@typescript-eslint/no-shadow': [
+          'error',
           {
-            "allow": ["Text"],
+            allow: ['Text'],
           },
         ],
       },

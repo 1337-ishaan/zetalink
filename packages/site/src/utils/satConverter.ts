@@ -1,5 +1,6 @@
 /**
  * Converts sats to btc.
+ *
  * @param sats - The amount in sats to convert.
  * @returns The amount in btc.
  */
@@ -9,6 +10,7 @@ export const satsToBtc = (sats: number): number => {
 
 /**
  * Converts btc to sats.
+ *
  * @param btc - The amount in btc to convert.
  * @returns The amount in sats.
  */

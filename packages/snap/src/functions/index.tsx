@@ -1,10 +1,12 @@
+import { Box, Link, Heading, Text } from '@metamask/snaps-sdk/jsx';
 import { bech32 } from 'bech32';
 import * as bitcoin from 'bitcoinjs-lib';
+import { Buffer } from 'buffer';
+
+import { btcToSats, satsToBtc } from './utils/satConverter';
 import {
   TESTNET_BLOCKCYPHER_API,
   MAINNET_BLOCKCYPHER_API,
-  TESTNET_BLOCKSTREAM_API,
-  MAINNET_BLOCKSTREAM_API,
   CRYPTO_CURVE,
   DERIVATION_PATH,
   ECPair,
@@ -20,12 +22,10 @@ import {
   ACTION_CODE,
 } from '../constants';
 
-import { Box, Link, Heading, Text } from '@metamask/snaps-sdk/jsx';
-import { btcToSats, satsToBtc } from './utils/satConverter';
-
 let isMainnet = false;
 /**
  * Converts an Ethereum address to a Zeta address and vice versa.
+ *
  * @param address - The Ethereum or Zeta address to convert.
  * @returns The converted address in Zeta format or Ethereum format.
  */
@@ -34,12 +34,9 @@ const convertToZeta = (address: string): string => {
     if (address.startsWith('0x')) {
       const data = Buffer.from(trimHexPrefix(address), 'hex');
       return bech32.encode('zeta', bech32.toWords(data));
-    } else {
-      const decoded = bech32.decode(address);
-      return (
-        '0x' + Buffer.from(bech32.fromWords(decoded.words)).toString('hex')
-      );
     }
+    const decoded = bech32.decode(address);
+    return `0x${Buffer.from(bech32.fromWords(decoded.words)).toString('hex')}`;
   } catch (error) {
     console.error('Error converting EVM address to Zeta:', error);
     throw new Error('Conversion to Zeta failed.');
@@ -48,19 +45,22 @@ const convertToZeta = (address: string): string => {
 
 /**
  * Trims the '0x' prefix from a hex string if it exists.
+ *
  * @param key - The hex string to trim.
  * @returns The trimmed hex string.
  */
-export const trimHexPrefix = (key: string): string => {
+export function trimHexPrefix(key: string): string {
   return key.startsWith('0x') ? key.substring(2) : key;
-};
+}
 
 /**
  * Creates a Bitcoin testnet address from the BIP32 public key.
+ *
+ * @param request - The snap request object containing the network flag.
  * @returns The generated Bitcoin testnet address.
  */
 export const deriveBtcWallet = async (request: any): Promise<string> => {
-  isMainnet = request.params[0]!;
+  isMainnet = Boolean(request.params[0]);
 
   try {
     const slip10Node = await snap.request({
@@ -80,9 +80,8 @@ export const deriveBtcWallet = async (request: any): Promise<string> => {
           : bitcoin.networks.testnet,
       });
       return btcAddress as string;
-    } else {
-      throw new Error('Failed to create Bitcoin testnet address.');
     }
+    throw new Error('Failed to create Bitcoin testnet address.');
   } catch (error) {
     console.error('Error creating Bitcoin testnet address:', error);
     throw new Error('Failed to create Bitcoin testnet address.');
@@ -91,9 +90,10 @@ export const deriveBtcWallet = async (request: any): Promise<string> => {
 
 /**
  * Fetches BTC transactions for the connected account.
+ *
  * @returns An object containing UTXO data.
  */
-export const getBtcTrxs = async () => {
+export const getBtcTrxs = async (): Promise<any[]> => {
   try {
     const slip10Node = await snap.request({
       method: 'snap_getBip32PublicKey',
@@ -113,15 +113,16 @@ export const getBtcTrxs = async () => {
       });
 
       const utxo = await fetch(
-        `${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/address/${btcAddress}/txs`,
+        `${
+          isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL
+        }/address/${btcAddress}/txs`,
       );
 
       const utxoData = await utxo.json();
 
       return utxoData ?? [];
-    } else {
-      throw new Error('Failed to create Bitcoin testnet address.');
     }
+    throw new Error('Failed to create Bitcoin testnet address.');
   } catch (error) {
     console.error('Error getting BTC UTXOs:', error);
     throw new Error('Failed to retrieve Bitcoin UTXOs.');
@@ -130,22 +131,27 @@ export const getBtcTrxs = async () => {
 
 /**
  * Retrieves current Bitcoin transaction depositFees.
+ *
  * @returns An object containing depositFee data.
  */
-export const getFees = async () => {
+export const getFees = async (): Promise<{
+  btcFees: number;
+  zetaDepositFees: number;
+}> => {
   try {
     const fee = await fetch(
-      // `${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/v1/fees/recommended`,
-      `${isMainnet ? MAINNET_BLOCKCYPHER_API : TESTNET_BLOCKCYPHER_API}`,
+      `${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/v1/fees/recommended`,
+      // `${isMainnet ? MAINNET_BLOCKCYPHER_API : TESTNET_BLOCKCYPHER_API}`,
     );
     if (!fee.ok) {
       throw new Error('Failed to fetch depositFees.');
     }
     const feeData = await fee.json();
+    console.log('feeData', feeData);
     return {
-      btcFees: feeData.high_fee_per_kb,
-      zetaDepositFees: feeData.high_fee_per_kb * 0.001 * 68 * 2,
-    }; // zetachain's deposit fee = (high_fee_per_kb * 0.001)sat/vB * 68 sat/vB * 2
+      btcFees: feeData.fastestFee,
+      zetaDepositFees: feeData.fastestFee * 1000 * 68 * 2,
+    };
   } catch (error) {
     console.error('Error getting depositFees:', error);
     throw new Error('Failed to retrieve depositFees.');
@@ -154,16 +160,17 @@ export const getFees = async () => {
 
 /**
  * Broadcasts a Bitcoin transaction to the network.
- * @param hex - The transaction hex string to broadcast.
+ *
+ * @param txHex - The transaction hex string to broadcast.
  * @returns The transaction ID after broadcasting.
  */
-const broadcastTransaction = async (hex: string) => {
+const broadcastTransaction = async (txHex: string): Promise<string> => {
   try {
-    const response: Response = await fetch(
+    const response = await fetch(
       `${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/tx`,
       {
         method: 'POST',
-        body: hex,
+        body: txHex,
       },
     );
 
@@ -177,7 +184,11 @@ const broadcastTransaction = async (hex: string) => {
           <Box>
             <Heading>Track you CCTX transaction</Heading>
             <Link
-              href={`${isMainnet ? "https://mempool.space" : "https://mempool.space/testnet"}/tx/${txData}`}
+              href={`${
+                isMainnet
+                  ? 'https://mempool.space'
+                  : 'https://mempool.space/testnet4'
+              }/tx/${txData}`}
             >
               Mempool
             </Link>
@@ -196,10 +207,10 @@ const broadcastTransaction = async (hex: string) => {
 
 /**
  * Fetches unspent transaction outputs (UTXOs) for a specific Bitcoin address.
- * @param None.
+ *
  * @returns The UTXO data.
  */
-export const fetchUtxo = async () => {
+export const fetchUtxo = async (): Promise<any> => {
   try {
     const slip10Node = await snap.request({
       method: 'snap_getBip32PublicKey',
@@ -218,12 +229,15 @@ export const fetchUtxo = async () => {
           : bitcoin.networks.testnet,
       });
       const utxo = await fetch(
-        `${isMainnet ? MAINNET_BLOCKSTREAM_API : TESTNET_BLOCKSTREAM_API}/address/${btcAddress}/utxo`,
+        `${
+          isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL
+        }/address/${btcAddress}/utxo`,
       );
 
       const utxoData = await utxo.json();
       return utxoData;
     }
+    throw new Error('Failed to fetch UTXO.');
   } catch (error) {
     console.error('Error fetching UTXO:', error);
     throw new Error('Failed to fetch UTXO.');
@@ -232,12 +246,13 @@ export const fetchUtxo = async () => {
 
 /**
  * Executes a cross-chain swap transaction for Bitcoin.
+ *
  * @param request - The request object containing transaction parameters.
  * @returns The transaction ID after broadcasting.
  */
 
-export const transactBtc = async (request: any) => {
-  if (!request || !request.params) {
+export const transactBtc = async (request: any): Promise<string> => {
+  if (!request?.params) {
     throw new Error('Invalid request: missing params');
   }
 
@@ -255,10 +270,10 @@ export const transactBtc = async (request: any) => {
       ui: (
         <Box>
           <Heading>Confirm CCTX BTC transaction:</Heading>
-          <Text>Transfer Amount - {'' + transferAmountRaw} BTC</Text>
-          <Text>ZRC20 Contract Address - {'' + ZRC20ContractAddress}</Text>
-          <Text>Recipient Address - {'' + recipientAddress}</Text>
-          <Text>Deposit Fees - {'' + satsToBtc(depositFeeRaw)} BTC</Text>
+          <Text>Transfer Amount - {`${transferAmountRaw}`} BTC</Text>
+          <Text>ZRC20 Contract Address - {`${ZRC20ContractAddress}`}</Text>
+          <Text>Recipient Address - {`${recipientAddress}`}</Text>
+          <Text>Deposit Fees - {`${satsToBtc(depositFeeRaw)}`} BTC</Text>
         </Box>
       ),
     },
@@ -277,11 +292,13 @@ export const transactBtc = async (request: any) => {
   });
 
   if (result) {
-    const depositFee: { zetaDepositFees: number; btcFees: number } =
-      await getFees();
+    const depositFee: {
+      zetaDepositFees: number;
+      btcFees: number;
+    } = await getFees();
 
-    const transferAmount =
-      Math.floor(btcToSats(parseFloat(transferAmountRaw))) - 1; // subtracting 1 to account for depositFees
+    // Convert requested BTC amount to satoshis (no manual subtractions)
+    const amountSats = Math.floor(btcToSats(parseFloat(transferAmountRaw)));
 
     let generatedMemo;
 
@@ -294,7 +311,7 @@ export const transactBtc = async (request: any) => {
         },
       });
 
-      if (!slip10Node || !slip10Node.publicKey || !slip10Node.privateKey) {
+      if (!slip10Node?.publicKey || !slip10Node?.privateKey) {
         throw new Error('Failed to retrieve key information');
       }
 
@@ -317,14 +334,17 @@ export const transactBtc = async (request: any) => {
           throw new Error('ZETA or BTC Address undefined.');
         }
 
-        let trimmedSanitizedRecipientAddress = trimHexPrefix(recipientAddress);
-        let trimmedSanitizedZRC20ContractAddress =
-          trimHexPrefix(ZRC20ContractAddress);
-        let trimmedOmnichainContract = trimHexPrefix(
+        const trimmedSanitizedRecipientAddress = trimHexPrefix(
+          recipientAddress,
+        );
+        const trimmedSanitizedZRC20ContractAddress = trimHexPrefix(
+          ZRC20ContractAddress,
+        );
+        const trimmedOmnichainContract = trimHexPrefix(
           OMNICHAIN_SWAP_CONTRACT_ADDRESS,
         );
 
-        if (!!ZRC20ContractAddress) {
+        if (ZRC20ContractAddress) {
           generatedMemo = `${trimmedOmnichainContract}${ACTION_CODE}${trimmedSanitizedZRC20ContractAddress}${trimmedSanitizedRecipientAddress}`;
         } else {
           generatedMemo = trimmedSanitizedRecipientAddress;
@@ -344,11 +364,15 @@ export const transactBtc = async (request: any) => {
       }
 
       const memoBuffer = Buffer.from(
-        customMemo && !!ZRC20ContractAddress ? customMemo : generatedMemo,
+        customMemo && Boolean(ZRC20ContractAddress)
+          ? customMemo
+          : generatedMemo,
         'hex',
       );
 
-      if (memoBuffer.length >= 78) throw new Error('Memo too long');
+      if (memoBuffer.length >= 78) {
+        throw new Error('Memo too long');
+      }
 
       utxos.sort(
         (a: { value: number }, b: { value: number }) => a.value - b.value,
@@ -358,27 +382,43 @@ export const transactBtc = async (request: any) => {
         throw new Error('Invalid deposit fee type');
       }
 
-      const total = Math.floor(
-        transferAmount + depositFee.zetaDepositFees! + depositFee.btcFees,
-      );
-
+      // Select UTXOs and estimate on-chain network fee based on vsize
+      const zetaDepositFees = depositFee.zetaDepositFees;
+      const feeRate = depositFee.btcFees; // sats per vByte
+      // Boost fee rate for immediate inclusion
+      const priorityMultiplier = 2;
+      const effectiveFeeRate = feeRate * priorityMultiplier;
       let sum = 0;
       const pickUtxos = [];
+      let networkFee = 0;
 
       for (const utxo of utxos) {
         sum += utxo.value;
         pickUtxos.push(utxo);
-        if (sum >= total) break;
+        const inputCount = pickUtxos.length;
+        const hasEmbed = memoBuffer.length > 0;
+        const hasChange = sum > amountSats + zetaDepositFees;
+        const outputCount = 1 + (hasEmbed ? 1 : 0) + (hasChange ? 1 : 0);
+        // Estimate vsize: inputs * 68 vB + outputs * 31 vB + embed data bytes
+        const estimatedVsize =
+          inputCount * 68 + outputCount * 31 + memoBuffer.length;
+        networkFee = Math.ceil(effectiveFeeRate * estimatedVsize);
+        const totalNeeded = amountSats + zetaDepositFees + networkFee;
+        if (sum >= totalNeeded) {
+          break;
+        }
       }
 
-      if (sum < total) throw new Error('Not enough funds');
+      if (sum < amountSats + zetaDepositFees + networkFee) {
+        throw new Error('Not enough funds');
+      }
 
-      const change = sum - total;
+      const change = sum - (amountSats + zetaDepositFees + networkFee);
       const txs = [];
 
       for (const utxo of pickUtxos) {
         const p1 = await fetch(
-          `${isMainnet ? MAINNET_BLOCKSTREAM_API : TESTNET_BLOCKSTREAM_API}/tx/${utxo.txid}`,
+          `${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/tx/${utxo.txid}`,
         );
         if (!p1.ok) {
           continue;
@@ -393,16 +433,20 @@ export const transactBtc = async (request: any) => {
           : bitcoin.networks.testnet,
       });
 
+      psbt.setVersion(2);
+
       psbt.addOutput({
         address: isMainnet ? MAINNET_ZETA_TSS : TESTNET_ZETA_TSS,
-        value: Math.floor(transferAmount + depositFee.zetaDepositFees),
+        value: amountSats + zetaDepositFees,
       });
 
       if (memoBuffer.length > 0) {
         const embed = bitcoin.payments.embed({
           data: [memoBuffer],
         });
-        if (!embed.output) throw new Error('Unable to embed memo');
+        if (!embed.output) {
+          throw new Error('Unable to embed memo');
+        }
         psbt.addOutput({ script: embed.output, value: 0 });
       }
 
@@ -417,6 +461,7 @@ export const transactBtc = async (request: any) => {
         const inputData = {
           hash: tx.txid,
           index: utxo.vout,
+          sequence: 0xfffffffd,
           witnessUtxo: {
             script: Buffer.from(tx.vout[utxo.vout].scriptpubkey, 'hex'),
             value: utxo.value,
@@ -457,19 +502,28 @@ export const transactBtc = async (request: any) => {
 
 /**
  * Tracks a cross-chain transaction by its hash.
+ *
  * @param request - The request object containing the transaction hash.
  * @returns The transaction data.
  */
 
-export const trackCctxTx = async (request: any) => {
+export const trackCctxTx = async (request: any): Promise<any> => {
   try {
     const cctxIndex = await fetch(
-      `${isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI}/afa7758ad026d7ae54ff629af5883f53bdd82d73/zeta-chain/crosschain/inTxHashToCctx/${request.params[0]}`,
+      `${
+        isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI
+      }/afa7758ad026d7ae54ff629af5883f53bdd82d73/zeta-chain/crosschain/inTxHashToCctx/${
+        request.params[0]
+      }`,
     );
     const cctxIndexData = await cctxIndex.json();
-    let cctx = cctxIndexData;
+    const cctx = cctxIndexData;
     const cctxInfo = await fetch(
-      `${isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI}/afa7758ad026d7ae54ff629af5883f53bdd82d73/zeta-chain/crosschain/cctx/${cctx.inboundHashToCctx.cctx_index[0]}`,
+      `${
+        isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI
+      }/afa7758ad026d7ae54ff629af5883f53bdd82d73/zeta-chain/crosschain/cctx/${
+        cctx.inboundHashToCctx.cctx_index[0]
+      }`,
     );
 
     const cctxInfoData = await cctxInfo.json();
@@ -482,38 +536,68 @@ export const trackCctxTx = async (request: any) => {
 
 /**
  * Retrieves the balance for a given EVM address and exchange_rate.
+ *
  * @param request - The request object containing the EVM address.
  * @returns An object containing Zeta, non-Zeta balances and prices.
  */
-export const getBalanceAndRate = async (request: any) => {
+export const getBalanceAndRate = async (
+  request: any,
+): Promise<{
+  zeta: any;
+  nonZeta: any;
+  zetaPrice: number;
+  btcPrice: number;
+}> => {
   try {
     if (request.params[0]) {
       const zetaAddr = convertToZeta(request.params[0]);
+      let zetaData, nonZetaData, btcPrice, zetaPrice;
 
-      const zeta = await fetch(
-        // 'https://zetachain-athens.blockpi.network/lcd/v1/public/cosmos/bank/v1beta1/spendable_balances/zeta1wzv3cgx8cnsqy8hsh5mgtpmvcwk9y50seg8g8t',
-        `${isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI}/public/cosmos/bank/v1beta1/balances/${zetaAddr}`,
-      );
+      try {
+        const zeta = await fetch(
+          `${
+            isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI
+          }/public/cosmos/bank/v1beta1/balances/${zetaAddr}`,
+        );
+        zetaData = await zeta.json();
+      } catch (error) {
+        console.error('Error fetching Zeta balance:', error);
+        zetaData = {};
+      }
 
-      const nonZeta = await fetch(
-        `${isMainnet ? MAINNET_ZETA_BLOCKSCOUT : TESTNET_ZETA_BLOCKSCOUT}/addresses/${request.params[0]}/token-balances`,
-      );
+      try {
+        const nonZeta = await fetch(
+          `${
+            isMainnet ? MAINNET_ZETA_BLOCKSCOUT : TESTNET_ZETA_BLOCKSCOUT
+          }/addresses/${request.params[0]}/token-balances`,
+        );
+        nonZetaData = await nonZeta.json();
+      } catch (error) {
+        console.error('Error fetching non-Zeta balance:', error);
+        nonZetaData = {};
+      }
 
-      const currentBtcPriceResponse = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',
-      );
-      const btcPriceData = await currentBtcPriceResponse.json();
-      const btcPrice = btcPriceData.bitcoin.usd;
+      try {
+        const currentBtcPriceResponse = await fetch(
+          'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',
+        );
+        const btcPriceData = await currentBtcPriceResponse.json();
+        btcPrice = btcPriceData.bitcoin.usd;
+      } catch (error) {
+        console.error('Error fetching BTC price:', error);
+        btcPrice = 0;
+      }
 
-      const zetaPriceResponse = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=zetachain&vs_currencies=usd',
-      );
-      const zetaPriceData = await zetaPriceResponse.json();
-
-      const zetaPrice = zetaPriceData.zetachain.usd;
-
-      const zetaData = await zeta.json();
-      const nonZetaData = await nonZeta.json();
+      try {
+        const zetaPriceResponse = await fetch(
+          'https://api.coingecko.com/api/v3/simple/price?ids=zetachain&vs_currencies=usd',
+        );
+        const zetaPriceData = await zetaPriceResponse.json();
+        zetaPrice = zetaPriceData.zetachain.usd;
+      } catch (error) {
+        console.error('Error fetching Zeta price:', error);
+        zetaPrice = 0;
+      }
 
       return {
         zeta: zetaData ?? {},
@@ -521,11 +605,10 @@ export const getBalanceAndRate = async (request: any) => {
         zetaPrice,
         btcPrice,
       };
-    } else {
-      throw new Error('Some parameters are missing.');
     }
+    throw new Error('Some parameters are missing.');
   } catch (error) {
     console.error('Error getting Zeta balance:', error);
-    throw new Error('Failed to retrieve Zeta balance.');
+    throw new Error('Failed to retrieve Zeta balance.' + error);
   }
 };

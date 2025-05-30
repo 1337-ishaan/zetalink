@@ -1,10 +1,11 @@
 import { createContext, useState, useContext } from 'react';
-import { getLocalStorage } from '../utils';
-import FlexColumnWrapper from '../components/utils/wrappers/FlexColumnWrapper';
 
-interface StoreProviderProps {
+import FlexColumnWrapper from '../components/utils/wrappers/FlexColumnWrapper';
+import { getLocalStorage } from '../utils';
+
+type StoreProviderProps = {
   children: React.ReactNode;
-}
+};
 
 const StoreContext = createContext<any | undefined>(undefined);
 
@@ -19,10 +20,7 @@ export const useStore = () => {
 
 const StoreProvider = ({ children }: StoreProviderProps) => {
   const persistState = JSON.parse(getLocalStorage('zeta-snap')!);
-  const [globalState, setGlobalState] = useState(
-    persistState ? persistState : null,
-
-  );
+  const [globalState, setGlobalState] = useState(persistState || null);
 
   return (
     <StoreContext.Provider value={{ globalState, setGlobalState }}>

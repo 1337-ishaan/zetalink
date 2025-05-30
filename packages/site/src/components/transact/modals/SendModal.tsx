@@ -1,18 +1,18 @@
+import Modal from 'react-modal';
 import styled from 'styled-components/macro';
 
-import Modal from 'react-modal';
-import Send from '../Send';
 import { ReactComponent as CrossIcon } from '../../../assets/cross.svg';
+import Send from '../Send';
 
 const SendModalWrapper = styled.div`
   position: relative;
   z-index: 2;
 `;
 
-interface SendModalProps {
+type SendModalProps = {
   isSendModalOpen: boolean;
   setIsSendModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
+};
 
 const customStyles = {
   content: {

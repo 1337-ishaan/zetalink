@@ -1,22 +1,25 @@
-import styled from 'styled-components/macro';
-import StyledInput from '../utils/StyledInput';
-import Typography from '../utils/Typography';
-import { useContext, useEffect, useState } from 'react';
-import StyledButton from '../utils/StyledButton';
-import { getBtcFees, transactBtc } from '../../utils/snap';
-import Select from 'react-dropdown-select';
 import axios from 'axios';
-import { getChainIcon } from '../../constants/getChainIcon';
+import { useContext, useEffect, useState } from 'react';
+import Select from 'react-dropdown-select';
+import { toast } from 'react-toastify';
+import styled from 'styled-components/macro';
+
 import { ReactComponent as GasIcon } from '../../assets/gas.svg';
 import { ReactComponent as RedirectIcon } from '../../assets/redirect.svg';
-
+import {
+  ZETA_MAINNET_BLOCKPI_API_URL,
+  ZETA_TESTNET_BLOCKPI_API_URL,
+} from '../../constants/api';
+import { getChainIcon } from '../../constants/getChainIcon';
+import { getBtcFees, transactBtc } from '../../utils/snap';
+import StyledButton from '../utils/StyledButton';
+import StyledInput from '../utils/StyledInput';
+import Typography from '../utils/Typography';
 import InfoBox from '../utils/InfoBox';
 import FlexColumnWrapper from '../utils/wrappers/FlexColumnWrapper';
 import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
-import { toast } from 'react-toastify';
 import TooltipInfo from '../utils/TooltipInfo';
 import { StoreContext } from '../../hooks/useStore';
-import { ZETA_MAINNET_BLOCKPI_API_URL, ZETA_TESTNET_BLOCKPI_API_URL } from '../../constants/api';
 import { satsToBtc } from '../../utils/satConverter';
 
 const SendWrapper = styled.div`
@@ -122,9 +125,9 @@ const SendWrapper = styled.div`
   }
 `;
 
-interface SendProps {
+type SendProps = {
   setIsSendModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
+};
 
 const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
   const [currentActive, setCurrentActive] = useState('zeta');
@@ -145,9 +148,9 @@ const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
     });
     try {
       await transactBtc(
-        recipientAddress ? recipientAddress : globalState?.evmAddress,
+        recipientAddress || globalState?.evmAddress,
         selectedZRC20.zrc20_contract_address,
-        +amount,
+        Number(amount),
         customMemo,
         zetaDepositFees,
       );
@@ -161,7 +164,7 @@ const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
   };
 
   const getZrc20Assets = async () => {
-    let assets = await axios.get(
+    const assets = await axios.get(
       // TODO: make API_URL as constant
       `${globalState?.isMainnet ? ZETA_MAINNET_BLOCKPI_API_URL : ZETA_TESTNET_BLOCKPI_API_URL}/zeta-chain/fungible/foreign_coins`,
     );
@@ -176,8 +179,8 @@ const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
   useEffect(() => {
     if (!depositFees) {
       const getFees = async () => {
-        let fees: any = await getBtcFees();
-        //@ts-ignore next line
+        const fees: any = await getBtcFees();
+        // @ts-ignore next line
         setZetaDepositFees(fees?.zetaDepositFees);
         setDepositFees(fees?.zetaDepositFees + fees?.btcFees);
       };
@@ -190,8 +193,8 @@ const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
     <div className="dropdown-item">
       <div className="icon-symbol-wrapper">
         <img
-          //@ts-ignore
-          src={getChainIcon(+option.foreign_chain_id)}
+          // @ts-ignore
+          src={getChainIcon(Number(option.foreign_chain_id))}
           alt={option.symbol}
           className="dropdown-image"
         />
@@ -224,7 +227,7 @@ const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
           searchBy="symbol"
           options={ZRC20Assets}
           contentRenderer={(index) => (
-            <div key={+index}>
+            <div key={Number(index)}>
               <CustomItemRenderer option={selectedZRC20} />
             </div>
           )}

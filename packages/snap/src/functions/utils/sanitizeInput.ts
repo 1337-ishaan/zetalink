@@ -1,6 +1,5 @@
-
-import DOMPurify from 'isomorphic-dompurify';
+import domPurify from 'isomorphic-dompurify';
 
 export const sanitizeInput = (inputText: string): string => {
-  return DOMPurify.sanitize(inputText);
+  return domPurify.sanitize(inputText);
 };

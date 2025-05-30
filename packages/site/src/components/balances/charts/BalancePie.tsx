@@ -1,20 +1,20 @@
+import Decimal from 'decimal.js';
 import React, { useState } from 'react';
 import { PieChart, Pie, Sector, ResponsiveContainer } from 'recharts';
-import Decimal from 'decimal.js';
 
 // Define the structure of the pie segment data
-interface PieData {
+type PieData = {
   label: string; // Segment label
   value: number; // Segment value
-}
+};
 
 // Props for the BalancePie component
-interface BalancePieProps {
+type BalancePieProps = {
   data: PieData[]; // Array of pie data
-}
+};
 
 // Props for the active shape rendering function
-interface RenderActiveShapeProps {
+type RenderActiveShapeProps = {
   cx: number; // Center X coordinate
   cy: number; // Center Y coordinate
   midAngle: number; // Midpoint angle
@@ -28,7 +28,7 @@ interface RenderActiveShapeProps {
   value: number; // Value of the segment
   stroke: string; // Stroke color for the segment
   strokeWidth: number; // Stroke width for the segment
-}
+};
 
 // Function to render the active shape of the pie segment
 const renderActiveShape = (props: RenderActiveShapeProps) => {
@@ -61,7 +61,7 @@ const renderActiveShape = (props: RenderActiveShapeProps) => {
   return (
     <g>
       <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
-        {payload.label} 
+        {payload.label}
       </text>
       <Sector
         cx={cx}
@@ -105,7 +105,7 @@ const renderActiveShape = (props: RenderActiveShapeProps) => {
         textAnchor={textAnchor}
         fill="#999" // Percentage label color
       >
-        {new Decimal(percent).times(100).toFixed(2)}% 
+        {new Decimal(percent).times(100).toFixed(2)}%
       </text>
     </g>
   );
@@ -126,13 +126,13 @@ const BalancePie = ({ data }: BalancePieProps) => {
   return (
     <ResponsiveContainer
       width="100%" // Responsive width
-      height="50%" // Responsive height
+      height={250} // Fixed height for chart visibility
     >
-      <PieChart width={600}>
+      <PieChart width={500}>
         <Pie
           activeIndex={activeIndex} // Highlight active segment
           // @ts-ignore
-          
+
           activeShape={renderActiveShape} // Custom active shape
           data={data} // Pie data
           innerRadius={50} // Inner radius

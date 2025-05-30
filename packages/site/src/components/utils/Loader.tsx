@@ -1,5 +1,6 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
+
 import { ReactComponent as LoaderSVG } from '../../assets/logo.svg'; // Import your SVG file
 
 // Define a keyframe animation

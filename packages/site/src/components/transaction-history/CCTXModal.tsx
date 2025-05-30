@@ -1,27 +1,28 @@
-import styled from 'styled-components/macro';
 import Modal from 'react-modal';
-import Typography from '../utils/Typography';
+import styled from 'styled-components/macro';
+
 import CctxItem from './CctxItem';
 import { ReactComponent as CrossIcon } from '../../assets/cross.svg';
 import CctxFailure from '../../assets/failure-image.png';
-import Loader from '../utils/Loader';
 import InfoBox from '../utils/InfoBox';
+import Loader from '../utils/Loader';
+import Typography from '../utils/Typography';
 
 const CCTXModalWrapper = styled.div`
   position: relative;
 `;
 
-interface CCTXModalProps {
+type CCTXModalProps = {
   cctx?: any;
   isCCTXModalOpen: boolean;
   setIsCCTXModalOpen: (isOpen: boolean) => void;
   cctxError?: string;
-}
+};
 
 const customStyles = {
   content: {
     top: '50%',
-    maxWidth: '40%',
+    // maxWidth: '40%',
     left: '50%',
     right: 'auto',
     bottom: 'auto',
@@ -32,7 +33,7 @@ const customStyles = {
     alignItems: 'center',
     background: '#141417',
     padding: '16px',
-    width: '300px',
+    width: '400px',
     transition: '.5s all',
   },
 };

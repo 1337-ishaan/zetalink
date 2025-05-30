@@ -1,54 +1,54 @@
-import styled from 'styled-components/macro';
-import { useContext, useEffect, useState } from 'react';
-import { StoreContext } from '../../hooks/useStore';
-import { getBalanceAndRate } from '../../utils';
+import BigNumber from 'bignumber.js';
 import DOMPurify from 'dompurify';
+import { useContext, useEffect, useState } from 'react';
+import styled from 'styled-components/macro';
+
+import BalancePie from './charts/BalancePie';
+import EmptyBalance from './EmptyBalance';
 import { ReactComponent as BtcIcon } from '../../assets/bitcoin.svg';
 import { ReactComponent as ZetaIcon } from '../../assets/zetachain.svg';
-import Typography from '../utils/Typography';
-import TooltipInfo from '../utils/TooltipInfo';
-import FlexColumnWrapper from '../utils/wrappers/FlexColumnWrapper';
-import BalancePie from './charts/BalancePie';
-import BigNumber from 'bignumber.js';
-import EmptyBalance from './EmptyBalance';
+import { StoreContext } from '../../hooks/useStore';
+import { getBalanceAndRate } from '../../utils';
 import { satsToBtc } from '../../utils/satConverter';
+import TooltipInfo from '../utils/TooltipInfo';
+import Typography from '../utils/Typography';
+import FlexColumnWrapper from '../utils/wrappers/FlexColumnWrapper';
 
-interface BalanceData {
+type BalanceData = {
   label: string;
   value: number;
   usdPrice?: number | null;
   icon_url?: string | null;
-}
+};
 
-interface NonZetaToken {
+type NonZetaToken = {
   token: {
     symbol: string;
     exchange_rate: number | null;
     icon_url: string | null;
   };
   value: number;
-}
+};
 
-interface ZetaBalance {
+type ZetaBalance = {
   denom: string;
   amount: number;
-}
+};
 
-interface ZetaBalanceResponse {
+type ZetaBalanceResponse = {
   nonZeta: NonZetaToken[] | { message?: string };
   zeta: {
     balances: ZetaBalance[];
   };
   zetaPrice: number;
   btcPrice: number;
-}
+};
 
 const BalancesWrapper = styled(FlexColumnWrapper)`
   padding: 32px;
   background: ${(props) => props.theme.colors.dark?.default};
   box-shadow: 0px 0px 21px 5px rgba(0, 0, 0, 1);
   border-radius: ${(props) => props.theme.borderRadius};
-  width: 50%;
   width: 500px;
 
   .input-container {
@@ -69,20 +69,45 @@ const BalancesWrapper = styled(FlexColumnWrapper)`
   }
 
   table {
-    border: 3px solid #ddd;
-    border-collapse: collapse;
+    width: 100%;
+    margin-top: 16px;
+    border-collapse: separate;
+    border-spacing: 0;
+    z-index: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
-    th,
-    td {
-      padding: 4px 8px;
-      color: #eee;
-      border: 1px solid #ddd;
-      text-align: left;
+    thead {
+      background: #1a1a1a;
     }
 
     th {
-      color: #a5a8a5;
+      padding: 12px 16px;
+      color: #bbb;
       text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #333;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      text-align: left;
+    }
+
+    td {
+      padding: 12px 16px;
+      color: #eee;
+      border-bottom: 1px solid #333;
+      text-align: left;
+    }
+
+    tbody tr {
+      background: #111;
+      &:nth-child(even) {
+        background: #1a1a1a;
+      }
+      &:hover {
+        background: #222;
+      }
     }
   }
 
@@ -97,14 +122,14 @@ const BalancesWrapper = styled(FlexColumnWrapper)`
   }
 `;
 
-interface BalancesProps {}
+type BalancesProps = {};
 
 const Balances = ({}: BalancesProps): JSX.Element => {
   const { globalState } = useContext(StoreContext);
   const [data, setData] = useState<BalanceData[]>([]);
   const [searched, setSearched] = useState<BalanceData[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const isMainnet = globalState.isMainnet;
+  const { isMainnet } = globalState;
 
   useEffect(() => {
     if (
@@ -124,7 +149,7 @@ const Balances = ({}: BalancesProps): JSX.Element => {
                 usdPrice:
                   new BigNumber(t?.value)
                     .dividedBy(t?.token?.symbol === 'tBTC' ? 1e8 : 1e18)
-                    .toNumber() * +t.token.exchange_rate! ?? 0,
+                    .toNumber() * Number(t.token.exchange_rate!),
                 icon_url: t.token.icon_url ?? '',
                 value: new BigNumber(t?.value)
                   .dividedBy(t?.token?.symbol === 'tBTC' ? 1e8 : 1e18)
@@ -157,10 +182,10 @@ const Balances = ({}: BalancesProps): JSX.Element => {
               ...maps,
               {
                 label: result?.zeta?.balances[0]?.denom
-                  ? result.zeta.balances[0]?.denom!
+                  ? result.zeta.balances[0]?.denom
                   : 'ZETA',
                 value: result?.zeta?.balances[0]?.amount
-                  ? result.zeta.balances[0]?.amount! / 1e18
+                  ? result.zeta.balances[0]?.amount / 1e18
                   : 0,
                 usdPrice:
                   (result.zeta.balances[0]?.amount! / 1e18) * result.zetaPrice,
@@ -219,7 +244,7 @@ const Balances = ({}: BalancesProps): JSX.Element => {
             </div>
             {error && data.length === 0 && (
               <div className="error-message">
-                "Error loading balances, {error + ''}
+                "Error loading balances, {`${error}`}
               </div>
             )}
             <BalancePie data={data} />

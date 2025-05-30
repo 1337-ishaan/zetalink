@@ -8,12 +8,12 @@ import DOMPurify from 'dompurify';
 export const getLocalStorage = (key: string): string | null => {
   // Fallback to return null if localStorage is not available
   const ls = typeof window !== 'undefined' ? window.localStorage : null;
-  
+
   if (ls) {
     const data = ls.getItem(key);
     return data ? DOMPurify.sanitize(data) : null;
   }
-  
+
   return null; // Return null if localStorage is not available
 };
 

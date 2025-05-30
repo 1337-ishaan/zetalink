@@ -1,10 +1,7 @@
 import type { MetaMaskInpageProvider } from '@metamask/providers';
+
 import { defaultSnapOrigin } from '../config';
 import type { GetSnapsResponse, Snap } from '../types';
-
-
-
-
 
 /**
  * Get the installed snaps in MetaMask.
@@ -30,7 +27,7 @@ export const connectSnap = async (
   snapId: string = defaultSnapOrigin,
   params: Record<'version' | string, unknown> = {},
 ) => {
-console.log('SNAPCALL --> connectSnap');
+  console.log('SNAPCALL --> connectSnap');
   try {
     await window.ethereum.request({
       method: 'wallet_requestSnaps',
@@ -77,8 +74,7 @@ export const getSnap = async (version?: string): Promise<Snap | undefined> => {
   }
 };
 
-
-export const createBtcWallet = async (isMainnet=false) => {
+export const createBtcWallet = async (isMainnet = false) => {
   // invoke snap
   try {
     const result = await window.ethereum.request({
@@ -112,7 +108,6 @@ export const getBtcTrxs = async () => {
   }
 };
 
-
 export const transactBtc = async (
   recipientAddress: string,
   ZRC20ContractAddress: string,
@@ -120,7 +115,7 @@ export const transactBtc = async (
   customMemo: string,
   depositFee: number,
 ) => {
-  try{
+  try {
     const result = await window.ethereum.request({
       method: 'wallet_snap',
       params: {
@@ -134,17 +129,17 @@ export const transactBtc = async (
             ZRC20ContractAddress,
             amount,
           ],
-        }
-     }    
-   });
-   return result;
+        },
+      },
+    });
+    return result;
   } catch (error) {
     throw error;
   }
 };
 
-export const trackCctx = async (trxHash:string) => {
-console.log(trxHash, 'trxHash ion snap');
+export const trackCctx = async (trxHash: string) => {
+  console.log(trxHash, 'trxHash ion snap');
   try {
     const result = await window.ethereum.request({
       method: 'wallet_snap',
@@ -178,6 +173,7 @@ export const getBalanceAndRate = async (addr: string) => {
         request: { method: 'get-balance-and-rate', params: [addr] },
       },
     });
+
     return result;
   } catch (error) {
     console.error('Error in getBalanceAndRate:', error);
@@ -212,9 +208,11 @@ export const getBtcUtxo = async () => {
         request: { method: 'get-btc-utxo' },
       },
     });
-
     if (Array.isArray(result)) {
-      const totalValue = result.reduce((acc: number, item: any) => acc + item.value, 0);
+      const totalValue = result.reduce(
+        (acc: number, item: any) => acc + item.value,
+        0,
+      );
       return totalValue;
     }
     return 0;

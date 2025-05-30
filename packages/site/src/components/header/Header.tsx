@@ -1,24 +1,24 @@
-import styled from 'styled-components/macro';
+import { ethers } from 'ethers';
 import React, { useContext, useEffect, useState } from 'react';
-import { StoreContext } from '../../hooks/useStore';
-import { ReactComponent as Logo } from '../../assets/logo.svg';
-import { ReactComponent as DisconnectIcon } from '../../assets/disconnect.svg';
+import styled from 'styled-components/macro';
 
+import { ReactComponent as BitcoinLogo } from '../../assets/bitcoin.svg';
+import { ReactComponent as DisconnectIcon } from '../../assets/disconnect.svg';
+import { ReactComponent as Logo } from '../../assets/logo.svg';
+import { ReactComponent as ZetaLogo } from '../../assets/zetachain.svg';
 import { MetaMaskContext } from '../../hooks';
+import { StoreContext } from '../../hooks/useStore';
 import {
   connectSnap,
   createBtcWallet,
   disconnectSnap,
   setLocalStorage,
 } from '../../utils';
-import StyledButton from '../utils/StyledButton';
-import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
-import { ethers } from 'ethers';
 import Copyable from '../utils/Copyable';
-import { ReactComponent as BitcoinLogo } from '../../assets/bitcoin.svg';
-import { ReactComponent as ZetaLogo } from '../../assets/zetachain.svg';
+import StyledButton from '../utils/StyledButton';
 import Toggle from '../utils/Toggle';
 import Typography from '../utils/Typography';
+import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
 
 const HeaderWrapper = styled(FlexRowWrapper)`
   justify-content: space-between;
@@ -98,7 +98,7 @@ const HeaderWrapper = styled(FlexRowWrapper)`
      }
   `;
 
-interface HeaderProps {}
+type HeaderProps = {};
 
 const Header = ({}: HeaderProps): JSX.Element => {
   const [state] = useContext(MetaMaskContext);
@@ -174,7 +174,7 @@ const Header = ({}: HeaderProps): JSX.Element => {
                 }
               />
               <StyledButton
-                onClick={() => onConnectSnap(globalState?.isMainnet)}
+                onClick={async () => onConnectSnap(globalState?.isMainnet)}
               >
                 {!state.installedSnap ? 'Install' : 'Connect'} ZetaLink
               </StyledButton>

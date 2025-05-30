@@ -1,15 +1,16 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { getBtcTrxs, getBtcUtxo } from '../../utils';
 import styled from 'styled-components';
-import Typography from '../utils/Typography';
+
 import TrxRow from './TrxRow';
 import { ReactComponent as RefreshIcon } from '../../assets/refresh.svg';
-import Loader from '../utils/Loader';
-import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
-import TooltipInfo from '../utils/TooltipInfo';
 import { StoreContext } from '../../hooks/useStore';
+import { getBtcTrxs, getBtcUtxo } from '../../utils';
 import Arrow from '../utils/Arrow';
+import Loader from '../utils/Loader';
+import TooltipInfo from '../utils/TooltipInfo';
+import Typography from '../utils/Typography';
 import FlexColumnWrapper from '../utils/wrappers/FlexColumnWrapper';
+import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
 
 const TrxHistoryWrapper = styled.div`
   background: ${(props) => props.theme.colors.dark?.default};
@@ -101,7 +102,7 @@ const TrxHistory: React.FC = () => {
 
   useEffect(() => {
     if (
-      (!!globalState?.btcAddress &&
+      (Boolean(globalState?.btcAddress) &&
         !globalState?.btcTrxs &&
         !globalState?.utxo) ||
       isRefetched ||
@@ -114,7 +115,7 @@ const TrxHistory: React.FC = () => {
           setGlobalState({
             ...globalState,
             btcTrxs: results,
-            utxo, //results?.final_balance - results?.unconfirmed_balance,
+            utxo, // results?.final_balance - results?.unconfirmed_balance,
           });
         } catch (error) {
           console.error(error);

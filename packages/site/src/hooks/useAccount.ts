@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import React, { useEffect, useState, useCallback } from 'react';
+
 import { createBtcWallet } from '../utils';
 
 const useAccount = (isSnapInstalled = false) => {

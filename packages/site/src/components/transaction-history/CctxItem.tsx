@@ -1,14 +1,15 @@
 import React from 'react';
 import styled from 'styled-components/macro';
-import { trimHexAddress } from '../../utils/trimHexAddr';
-import { getChainIcon } from '../../constants/getChainIcon';
-import Typography from '../utils/Typography';
-import { ReactComponent as RightArrow } from '../../assets/right-arrow.svg';
+
 import { ReactComponent as RedirectIcon } from '../../assets/redirect.svg';
-import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
-import FlexColumnWrapper from '../utils/wrappers/FlexColumnWrapper';
-import InfoBox from '../utils/InfoBox';
+import { ReactComponent as RightArrow } from '../../assets/right-arrow.svg';
+import { getChainIcon } from '../../constants/getChainIcon';
 import { satsToBtc } from '../../utils/satConverter';
+import { trimHexAddress } from '../../utils/trimHexAddr';
+import InfoBox from '../utils/InfoBox';
+import Typography from '../utils/Typography';
+import FlexColumnWrapper from '../utils/wrappers/FlexColumnWrapper';
+import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
 
 // Styled component for the CctxItem
 const CctxItemWrapper = styled(FlexColumnWrapper)`
@@ -16,7 +17,9 @@ const CctxItemWrapper = styled(FlexColumnWrapper)`
   row-gap: 8px;
   padding: 24px;
   border-radius: 12px;
-  width: 20em;
+  // width: 100%;
+  // max-width: 40em;
+  height: fit-content;
   a {
     color: #eee;
     font-size: 16px;
@@ -47,18 +50,18 @@ const CctxItemWrapper = styled(FlexColumnWrapper)`
 `;
 
 // Define the structure of the CctxItemProps interface
-interface InboundTxParams {
+type InboundTxParams = {
   sender_chain_id: number;
   amount: number;
   tx_finalization_status: string;
-}
+};
 
-interface OutboundTxParams {
+type OutboundTxParams = {
   receiver_chainId: number;
   receiver: string;
-}
+};
 
-interface Cctx {
+type Cctx = {
   index: string;
   cctx_status: {
     status_message: string;
@@ -66,11 +69,11 @@ interface Cctx {
   };
   inbound_params: InboundTxParams;
   outbound_params: OutboundTxParams[];
-}
+};
 
-interface CctxItemProps {
+type CctxItemProps = {
   cctx: any | Cctx;
-}
+};
 
 // CctxItem component definition
 const CctxItem: React.FC<CctxItemProps> = ({ cctx }) => {
@@ -97,7 +100,7 @@ const CctxItem: React.FC<CctxItemProps> = ({ cctx }) => {
         <img
           className="chain-logo"
           // @ts-ignore
-          src={getChainIcon(+outbound_params?.[0]?.receiver_chainId)}
+          src={getChainIcon(Number(outbound_params?.[0]?.receiver_chainId))}
           alt=""
         />
       </FlexRowWrapper>
@@ -120,10 +123,9 @@ const CctxItem: React.FC<CctxItemProps> = ({ cctx }) => {
       </Typography>
       <Typography size={14}>
         Created at:{' '}
-        {new Date(cctx_status?.lastUpdate_timestamp * 1000).toLocaleString(
-          'en-GB',
-          { timeZone: 'UTC' },
-        )}
+        {new Date(
+          cctx_status?.lastUpdate_timestamp * 1000,
+        ).toLocaleString('en-GB', { timeZone: 'UTC' })}
       </Typography>
       <FlexRowWrapper className="flex-row">
         <Typography size={14} color="#bed837">

@@ -10,21 +10,21 @@ module.exports = {
       files: ['snap.config.ts'],
       extends: ['@metamask/eslint-config-nodejs'],
     },
-      {
-        files: ['**/*.ts', '**/*.tsx'],
-        extends: ['@metamask/eslint-config-typescript'],
-        rules: {
-          '@typescript-eslint/no-shadow': [
-            'error',
-            {
-              allow: ['Text'],
-            },
-          ],
-        },
+    {
+      files: ['**/*.ts', '**/*.tsx'],
+      extends: ['@metamask/eslint-config-typescript'],
+      rules: {
+        '@typescript-eslint/no-shadow': [
+          'error',
+          {
+            allow: ['Text'],
+          },
+        ],
       },
-  
-      {
-        files: ['*.test.ts', '*.test.tsx'],
+    },
+
+    {
+      files: ['*.test.ts', '*.test.tsx'],
       rules: {
         '@typescript-eslint/unbound-method': 'off',
       },

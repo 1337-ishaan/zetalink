@@ -1,19 +1,20 @@
 import 'rc-tooltip/assets/bootstrap_white.css';
-import styled from 'styled-components/macro';
 
 import Tooltip from 'rc-tooltip';
 import React from 'react';
-import { ReactComponent as InfoIcon } from '../../assets/info.svg';
+import styled from 'styled-components/macro';
+
 import FlexRowWrapper from './wrappers/FlexRowWrapper';
+import { ReactComponent as InfoIcon } from '../../assets/info.svg';
 
 const TooltipInfoWrapper = styled(Tooltip)`
   width: fit-content;
 `;
 
-interface TooltipInfoProps {
+type TooltipInfoProps = {
   children: React.ReactNode;
   placement?: string;
-}
+};
 
 const TooltipInfo = ({
   children,

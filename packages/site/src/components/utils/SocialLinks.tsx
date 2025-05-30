@@ -1,10 +1,10 @@
 import styled from 'styled-components/macro';
-import FlexRowWrapper from './wrappers/FlexRowWrapper';
 
-import { ReactComponent as XLogo } from '../../assets/x.svg';
+import FlexRowWrapper from './wrappers/FlexRowWrapper';
 import { ReactComponent as DiscordLogo } from '../../assets/discord.svg';
-import { ReactComponent as YoutubeLogo } from '../../assets/youtube.svg';
 import { ReactComponent as GitbookLogo } from '../../assets/gitbook.svg';
+import { ReactComponent as XLogo } from '../../assets/x.svg';
+import { ReactComponent as YoutubeLogo } from '../../assets/youtube.svg';
 
 const SocialLinksWrapper = styled(FlexRowWrapper)<{ isFloatingLeft?: boolean }>`
   column-gap: 24px;
@@ -53,9 +53,9 @@ const SocialLinksWrapper = styled(FlexRowWrapper)<{ isFloatingLeft?: boolean }>`
   }
 `;
 
-interface SocialLinksProps {
+type SocialLinksProps = {
   isFloatingLeft?: boolean;
-}
+};
 
 const SocialLinks = ({
   isFloatingLeft = true,

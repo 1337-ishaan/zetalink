@@ -1,13 +1,14 @@
-import styled from 'styled-components/macro';
-import Modal from 'react-modal';
-import { ReactComponent as CrossIcon } from '../../../assets/cross.svg';
-import { ReactComponent as BitcoinIcon } from '../../../assets/bitcoin.svg';
-import { ReactComponent as ZetaChainIcon } from '../../../assets/zetachain.svg';
 import { useContext, useState } from 'react';
-import { StoreContext } from '../../../hooks/useStore';
+import Modal from 'react-modal';
 import QRCode from 'react-qr-code';
-import Typography from '../../utils/Typography';
+import styled from 'styled-components/macro';
+
+import { ReactComponent as BitcoinIcon } from '../../../assets/bitcoin.svg';
+import { ReactComponent as CrossIcon } from '../../../assets/cross.svg';
+import { ReactComponent as ZetaChainIcon } from '../../../assets/zetachain.svg';
+import { StoreContext } from '../../../hooks/useStore';
 import Copyable from '../../utils/Copyable';
+import Typography from '../../utils/Typography';
 import FlexColumnWrapper from '../../utils/wrappers/FlexColumnWrapper';
 import FlexRowWrapper from '../../utils/wrappers/FlexRowWrapper';
 
@@ -19,10 +20,10 @@ const ReceiveModalWrapper = styled.div`
   }
 `;
 
-interface ReceiveModalProps {
+type ReceiveModalProps = {
   isReceiveModalOpen: boolean;
   setIsReceiveModalOpen: (isOpen: boolean) => void;
-}
+};
 
 const customStyles = {
   content: {

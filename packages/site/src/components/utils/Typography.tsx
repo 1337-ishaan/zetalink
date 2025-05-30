@@ -1,4 +1,5 @@
 import styled from 'styled-components/macro';
+
 import FlexRowWrapper from './wrappers/FlexRowWrapper';
 
 const TypographyWrapper = styled(FlexRowWrapper)<{
@@ -17,14 +18,14 @@ const TypographyWrapper = styled(FlexRowWrapper)<{
   font-size: ${(props) => (props.size ? props.size : '24')}px;
 `;
 
-interface TypographyProps {
+type TypographyProps = {
   children: string | JSX.Element | any;
   color?: string;
   size?: number | null;
   weight?: number | null;
   className?: string;
   onClick?: () => void;
-}
+};
 
 const Typography = ({
   children,

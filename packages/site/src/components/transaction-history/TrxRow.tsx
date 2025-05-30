@@ -1,15 +1,14 @@
-import { trimHexAddress } from '../../utils/trimHexAddr';
-import styled from 'styled-components/macro';
-import Arrow from '../utils/Arrow';
-import { trackCctx } from '../../utils';
-
 import { useEffect, useState } from 'react';
-import Typography from '../utils/Typography';
-import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
-import FlexColumnWrapper from '../utils/wrappers/FlexColumnWrapper';
-import { ReactComponent as RedirectIcon } from '../../assets/redirect.svg';
+import styled from 'styled-components/macro';
 
 import CCTXModal from './CCTXModal';
+import { ReactComponent as RedirectIcon } from '../../assets/redirect.svg';
+import { trackCctx } from '../../utils';
+import { trimHexAddress } from '../../utils/trimHexAddr';
+import Arrow from '../utils/Arrow';
+import Typography from '../utils/Typography';
+import FlexColumnWrapper from '../utils/wrappers/FlexColumnWrapper';
+import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
 
 const TrxRowWrapper = styled(FlexRowWrapper)<{ isSent: boolean }>`
   align-items: center;
@@ -58,16 +57,16 @@ const TrxRowWrapper = styled(FlexRowWrapper)<{ isSent: boolean }>`
   }
 `;
 
-interface Trx {
+type Trx = {
   hash: string;
   confirmations: number;
-}
+};
 
-interface TrxRowProps {
+type TrxRowProps = {
   trx: any;
   isSent: boolean;
   amount: number;
-}
+};
 
 const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount }) => {
   const [isCctxModalOpen, setIsCctxModalOpen] = useState(false);
@@ -85,7 +84,7 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount }) => {
     try {
       const cctxData: any = await trackCctx(trxHash);
 
-      if (!!cctxData) {
+      if (cctxData) {
         setCctx(cctxData?.CrossChainTx);
         setIsCctxModalOpen(true);
       }
@@ -99,7 +98,7 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount }) => {
       <TrxRowWrapper
         isSent={isSent}
         aria-disabled={isCctxClicked}
-        onClick={() => onTrackCctx(trx.txid)}
+        onClick={async () => onTrackCctx(trx.txid)}
       >
         <FlexRowWrapper className="trx-hash-wrapper">
           <Arrow isReceived={!isSent} />

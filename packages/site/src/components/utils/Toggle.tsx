@@ -27,24 +27,18 @@ const ToggleOption = styled.button<{ isActive: boolean }>`
   }
 `;
 
-interface ToggleProps {
+type ToggleProps = {
   isMainnet: boolean;
   onToggle: (option: boolean) => void;
-}
+};
 
 const Toggle: React.FC<ToggleProps> = ({ isMainnet = false, onToggle }) => {
   return (
     <ToggleWrapper>
-      <ToggleOption
-        isActive={isMainnet === false}
-        onClick={() => onToggle(false)}
-      >
+      <ToggleOption isActive={!isMainnet} onClick={() => onToggle(false)}>
         Testnet
       </ToggleOption>
-      <ToggleOption
-        isActive={isMainnet === true}
-        onClick={() => onToggle(true)}
-      >
+      <ToggleOption isActive={isMainnet} onClick={() => onToggle(true)}>
         Mainnet
       </ToggleOption>
     </ToggleWrapper>
