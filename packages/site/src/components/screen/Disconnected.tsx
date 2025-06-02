@@ -38,8 +38,8 @@ const Disconnected = ({}: DisconnectedProps): JSX.Element => {
           Welcome to ZetaLink 🎉
           <br />
           <br /> The only Metamask Snap allowing you to bridge native BTC to
-          supported ZRC20 asset on ZetaChain, Ethereum, Binance Smart Chain &
-          Polygon.
+          supported ZRC20 asset on ZetaChain, Ethereum, Binance Smart Chain,
+          Base, Arbitrum, TON, Sui, Solana, Avalanche & Polygon.
           <br />
           <br />
           <br />
