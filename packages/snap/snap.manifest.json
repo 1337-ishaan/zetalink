@@ -1,5 +1,5 @@
 {
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "ZetaLink enables users to bridge and cross-chain transfer native Bitcoin to select ZRC20 tokens across ZetaChain, Ethereum, Binance Smart Chain & Polygon, offering seamless cross-chain functionality and enhanced interoperability",
   "proposedName": "ZetaLink",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "git+https://github.com/1337-ishaan/zetalink"
   },
   "source": {
-    "shasum": "viEik62LihkpTBZJSZNN5CeiLFMQT8NCsvF6jukFBz8=",
+    "shasum": "H6Aj3Mxs7TdSuPGuXGiBKAmEOjaxGrrg3M/BN6UGkIY=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
