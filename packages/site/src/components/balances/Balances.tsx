@@ -241,6 +241,8 @@ const Balances = ({}: BalancesProps): JSX.Element => {
       setSearched(data);
     }
   };
+
+  console.log(searched, data, 'searched data');
   return (
     <BalancesWrapper>
       <Typography size={24}>
@@ -296,6 +298,7 @@ const Balances = ({}: BalancesProps): JSX.Element => {
                             src={
                               (getChainIcon(item.chainId) as unknown) as string
                             }
+                            style={{ width: '24px', height: '24px' }}
                             className="chain-icon"
                             alt={item.label}
                           />

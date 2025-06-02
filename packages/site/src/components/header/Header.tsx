@@ -39,6 +39,8 @@ const HeaderWrapper = styled(FlexRowWrapper)`
       position: absolute;
       top: -4px;
       left: -12px;
+      width:24px;
+      height:24px;
       transform: scale(1.4);
       opacity: 0.3;
       transition: opacity 0.3s ease;

@@ -154,7 +154,7 @@ const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
         customMemo,
         zetaDepositFees,
       );
-    } catch (e: unknown) {
+    } catch (e) {
       toast(`Error: ${(e as Error).message}`, { hideProgressBar: false });
     } finally {
       setIsTrxProcessing(false);
@@ -166,7 +166,11 @@ const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
   const getZrc20Assets = async () => {
     const assets = await axios.get(
       // TODO: make API_URL as constant
-      `${globalState?.isMainnet ? ZETA_MAINNET_BLOCKPI_API_URL : ZETA_TESTNET_BLOCKPI_API_URL}/zeta-chain/fungible/foreign_coins`,
+      `${
+        globalState?.isMainnet
+          ? ZETA_MAINNET_BLOCKPI_API_URL
+          : ZETA_TESTNET_BLOCKPI_API_URL
+      }/zeta-chain/fungible/foreign_coins`,
     );
     setZRC20Assets(assets.data.foreignCoins);
     return assets;
