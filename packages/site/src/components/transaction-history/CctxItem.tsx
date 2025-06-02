@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components/macro';
 
 import { ReactComponent as RedirectIcon } from '../../assets/redirect.svg';
@@ -77,6 +77,9 @@ type CctxItemProps = {
 
 // CctxItem component definition
 const CctxItem: React.FC<CctxItemProps> = ({ cctx }) => {
+  // State for toggling detailed information
+  const [showDetails, setShowDetails] = useState(false);
+
   // Error handling: Check if cctx is valid
   // if (!cctx || !cctx.inbound_params || !cctx.outbound_params.length) {
   //   return <Typography color="#ff0000">Invalid transaction data.</Typography>;
@@ -89,21 +92,24 @@ const CctxItem: React.FC<CctxItemProps> = ({ cctx }) => {
       <Typography color="#a9a8a8" size={18}>
         ZetaChain CCTX Transaction
       </Typography>
-      <FlexRowWrapper className="chain-swap">
-        <img
-          className="chain-logo"
-          // @ts-ignore
-          src={getChainIcon(18332)}
-          alt=""
-        />
-        <RightArrow className="arrow-icon" />
-        <img
-          className="chain-logo"
-          // @ts-ignore
-          src={getChainIcon(Number(outbound_params?.[0]?.receiver_chainId))}
-          alt=""
-        />
-      </FlexRowWrapper>
+      {inbound_params?.sender_chain_id != null &&
+        outbound_params?.[0]?.receiver_chainId != null && (
+          <FlexRowWrapper className="chain-swap">
+            <img
+              className="chain-logo"
+              // @ts-ignore
+              src={getChainIcon(Number(inbound_params.sender_chain_id))}
+              alt=""
+            />
+            <RightArrow className="arrow-icon" />
+            <img
+              className="chain-logo"
+              // @ts-ignore
+              src={getChainIcon(Number(outbound_params[0].receiver_chainId))}
+              alt=""
+            />
+          </FlexRowWrapper>
+        )}
       <FlexRowWrapper className="flex-row">
         <Typography size={16}>
           Trx Hash:{' '}
@@ -137,6 +143,110 @@ const CctxItem: React.FC<CctxItemProps> = ({ cctx }) => {
         chain transaction. The receiver will always be ZetaChain. For more
         details, visit ZetaScan (Trx Hash).
       </InfoBox>
+      <Typography
+        size={14}
+        color="#a9a8a8"
+        weight={400}
+        onClick={() => setShowDetails((prev) => !prev)}
+      >
+        {showDetails ? 'Hide Details' : 'Show Details'}
+      </Typography>
+      {showDetails && inbound_params && (
+        <FlexColumnWrapper style={{ rowGap: '4px', marginTop: '8px' }}>
+          {cctx.creator && (
+            <Typography size={12} color="#ddd">
+              <strong>Creator:</strong> {cctx.creator}
+            </Typography>
+          )}
+          {cctx.zeta_fees && (
+            <Typography size={12} color="#ddd">
+              <strong>Zeta Fees:</strong> {cctx.zeta_fees}
+            </Typography>
+          )}
+          {cctx.relayed_message && (
+            <Typography size={12} color="#ddd">
+              <strong>Relayed Message:</strong> {cctx.relayed_message}
+            </Typography>
+          )}
+          {cctx_status.status && (
+            <Typography size={12} color="#ddd">
+              <strong>CCTX Status:</strong> {cctx_status.status}
+            </Typography>
+          )}
+          {cctx_status.status_message != null && (
+            <Typography size={12} color="#ddd">
+              <strong>Status Message:</strong>{' '}
+              {cctx_status.status_message || 'N/A'}
+            </Typography>
+          )}
+          {cctx_status.error_message != null && (
+            <Typography size={12} color="#ddd">
+              <strong>Error Message:</strong>{' '}
+              {cctx_status.error_message || 'N/A'}
+            </Typography>
+          )}
+          {cctx_status.created_timestamp && (
+            <Typography size={12} color="#ddd">
+              <strong>Created At:</strong>{' '}
+              {new Date(
+                cctx_status.created_timestamp * 1000,
+              ).toLocaleString('en-GB', { timeZone: 'UTC' })}
+            </Typography>
+          )}
+          {cctx_status.lastUpdate_timestamp && (
+            <Typography size={12} color="#ddd">
+              <strong>Last Updated:</strong>{' '}
+              {new Date(
+                cctx_status.lastUpdate_timestamp * 1000,
+              ).toLocaleString('en-GB', { timeZone: 'UTC' })}
+            </Typography>
+          )}
+          {inbound_params?.sender && (
+            <Typography size={12} color="#ddd">
+              <strong>Inbound Sender:</strong> {inbound_params.sender}
+            </Typography>
+          )}
+          {inbound_params?.sender_chain_id != null && (
+            <Typography size={12} color="#ddd">
+              <strong>Inbound Chain ID:</strong>{' '}
+              {inbound_params.sender_chain_id}
+            </Typography>
+          )}
+          {inbound_params?.amount != null && (
+            <Typography size={12} color="#ddd">
+              <strong>Inbound Amount:</strong> {inbound_params.amount}
+            </Typography>
+          )}
+          {inbound_params?.tx_finalization_status && (
+            <Typography size={12} color="#ddd">
+              <strong>Inbound Status:</strong>{' '}
+              {inbound_params.tx_finalization_status}
+            </Typography>
+          )}
+          {outbound_params?.[0]?.receiver && (
+            <Typography size={12} color="#ddd">
+              <strong>Receiver:</strong> {outbound_params[0].receiver}
+            </Typography>
+          )}
+          {outbound_params?.[0]?.receiver_chainId != null && (
+            <Typography size={12} color="#ddd">
+              <strong>Receiver Chain ID:</strong>{' '}
+              {outbound_params[0].receiver_chainId}
+            </Typography>
+          )}
+          {outbound_params?.[0]?.hash && (
+            <Typography size={12} color="#ddd">
+              <strong>Outbound Tx Hash:</strong> {outbound_params[0].hash}
+            </Typography>
+          )}
+          {outbound_params?.[0]?.tx_finalization_status && (
+            <Typography size={12} color="#ddd">
+              <strong>Outbound Status:</strong>{' '}
+              {outbound_params[0].tx_finalization_status}
+            </Typography>
+          )}
+        </FlexColumnWrapper>
+      )}
     </CctxItemWrapper>
   );
 };

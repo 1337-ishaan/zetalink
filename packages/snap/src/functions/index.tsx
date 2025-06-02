@@ -18,11 +18,34 @@ import {
   MAINNET_ZETA_BLOCKSCOUT,
   MAINNET_ZETA_TSS,
   TESTNET_ZETA_TSS,
-  OMNICHAIN_SWAP_CONTRACT_ADDRESS,
+  TESTNET_OMNICHAIN_SWAP_CONTRACT_ADDRESS,
+  MAINNET_OMNICHAIN_SWAP_CONTRACT_ADDRESS,
   ACTION_CODE,
 } from '../constants';
 
 let isMainnet = false;
+
+// Add persistent storage helpers
+async function saveNetworkMode(mode: boolean): Promise<void> {
+  await snap.request({
+    method: 'snap_manageState',
+    params: {
+      operation: 'update',
+      newState: { isMainnet: mode },
+    },
+  });
+}
+
+async function loadNetworkMode(): Promise<boolean> {
+  const state = await snap.request({
+    method: 'snap_manageState',
+    params: { operation: 'get' },
+  });
+  return state && typeof state.isMainnet === 'boolean'
+    ? state.isMainnet
+    : false;
+}
+
 /**
  * Converts an Ethereum address to a Zeta address and vice versa.
  *
@@ -61,6 +84,7 @@ export function trimHexPrefix(key: string): string {
  */
 export const deriveBtcWallet = async (request: any): Promise<string> => {
   isMainnet = Boolean(request.params[0]);
+  await saveNetworkMode(isMainnet);
 
   try {
     const slip10Node = await snap.request({
@@ -94,6 +118,8 @@ export const deriveBtcWallet = async (request: any): Promise<string> => {
  * @returns An object containing UTXO data.
  */
 export const getBtcTrxs = async (): Promise<any[]> => {
+  isMainnet = await loadNetworkMode();
+
   try {
     const slip10Node = await snap.request({
       method: 'snap_getBip32PublicKey',
@@ -138,6 +164,8 @@ export const getFees = async (): Promise<{
   btcFees: number;
   zetaDepositFees: number;
 }> => {
+  isMainnet = await loadNetworkMode();
+
   try {
     const fee = await fetch(
       `${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/v1/fees/recommended`,
@@ -166,14 +194,15 @@ export const getFees = async (): Promise<{
  */
 const broadcastTransaction = async (txHex: string): Promise<string> => {
   try {
+    // Broadcast via mempool.space only
     const response = await fetch(
       `${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/tx`,
       {
         method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
         body: txHex,
       },
     );
-
     const txData = await response.text();
 
     await snap.request({
@@ -211,6 +240,8 @@ const broadcastTransaction = async (txHex: string): Promise<string> => {
  * @returns The UTXO data.
  */
 export const fetchUtxo = async (): Promise<any> => {
+  isMainnet = await loadNetworkMode();
+
   try {
     const slip10Node = await snap.request({
       method: 'snap_getBip32PublicKey',
@@ -252,6 +283,8 @@ export const fetchUtxo = async (): Promise<any> => {
  */
 
 export const transactBtc = async (request: any): Promise<string> => {
+  isMainnet = await loadNetworkMode();
+
   if (!request?.params) {
     throw new Error('Invalid request: missing params');
   }
@@ -341,11 +374,28 @@ export const transactBtc = async (request: any): Promise<string> => {
           ZRC20ContractAddress,
         );
         const trimmedOmnichainContract = trimHexPrefix(
-          OMNICHAIN_SWAP_CONTRACT_ADDRESS,
+          isMainnet
+            ? MAINNET_OMNICHAIN_SWAP_CONTRACT_ADDRESS
+            : TESTNET_OMNICHAIN_SWAP_CONTRACT_ADDRESS,
         );
 
+        const isValidHex = (str: string) => /^[0-9a-f]*$/i.test(str);
+        if (
+          !isValidHex(trimmedSanitizedRecipientAddress) ||
+          !isValidHex(trimmedSanitizedZRC20ContractAddress) ||
+          !isValidHex(trimmedOmnichainContract)
+        ) {
+          throw new Error('Addresses must contain valid hex characters only');
+        }
+
+        console.log('Address validation passed');
         if (ZRC20ContractAddress) {
-          generatedMemo = `${trimmedOmnichainContract}${ACTION_CODE}${trimmedSanitizedZRC20ContractAddress}${trimmedSanitizedRecipientAddress}`;
+          // Just the params the contract expects - no contract address or action code
+          generatedMemo = `${trimmedOmnichainContract}${trimmedSanitizedZRC20ContractAddress}${trimmedSanitizedRecipientAddress}`;
+
+          // Add withdraw flag if needed (01 for true, 00 for false)
+          const withdrawFlag = '01'; // or "00" if not withdrawing
+          generatedMemo += withdrawFlag;
         } else {
           generatedMemo = trimmedSanitizedRecipientAddress;
         }
@@ -386,7 +436,7 @@ export const transactBtc = async (request: any): Promise<string> => {
       const zetaDepositFees = depositFee.zetaDepositFees;
       const feeRate = depositFee.btcFees; // sats per vByte
       // Boost fee rate for immediate inclusion
-      const priorityMultiplier = 2;
+      const priorityMultiplier = isMainnet ? 2 : 5;
       const effectiveFeeRate = feeRate * priorityMultiplier;
       let sum = 0;
       const pickUtxos = [];
@@ -501,37 +551,33 @@ export const transactBtc = async (request: any): Promise<string> => {
 };
 
 /**
- * Tracks a cross-chain transaction by its hash.
+ * Tracks a cross-chain transaction given its inbound transaction hash.
  *
- * @param request - The request object containing the transaction hash.
- * @returns The transaction data.
+ * @param request - The request object containing the inbound transaction hash as request.params[0],
+ *                  typically the observed_hash from the inbound_params of the CrossChainTx.
+ * @returns The detailed CCTX data fetched by its cctx index.
  */
-
 export const trackCctxTx = async (request: any): Promise<any> => {
-  try {
-    const cctxIndex = await fetch(
-      `${
-        isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI
-      }/afa7758ad026d7ae54ff629af5883f53bdd82d73/zeta-chain/crosschain/inTxHashToCctx/${
-        request.params[0]
-      }`,
-    );
-    const cctxIndexData = await cctxIndex.json();
-    const cctx = cctxIndexData;
-    const cctxInfo = await fetch(
-      `${
-        isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI
-      }/afa7758ad026d7ae54ff629af5883f53bdd82d73/zeta-chain/crosschain/cctx/${
-        cctx.inboundHashToCctx.cctx_index[0]
-      }`,
-    );
+  isMainnet = await loadNetworkMode();
 
-    const cctxInfoData = await cctxInfo.json();
-    return cctxInfoData;
-  } catch (error) {
-    console.error('Error tracking cross-chain transaction:', error);
-    throw new Error('Failed to track cross-chain transaction.');
+  const rawHash = request.params?.[0];
+  if (!rawHash) {
+    throw new Error('Missing transaction hash parameter');
   }
+  const txHash = trimHexPrefix(rawHash);
+  const baseUrl = isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI;
+  const projectId = 'afa7758ad026d7ae54ff629af5883f53bdd82d73';
+
+  // Fetch CCTX index using inbound transaction hash
+  const indexUrl = `${baseUrl}/public/zeta-chain/crosschain/inboundHashToCctxData/${txHash}`;
+  const indexResp = await fetch(indexUrl);
+  if (!indexResp.ok) {
+    throw new Error(
+      `Failed to fetch CCTX index from ${indexUrl}: ${indexResp.status} ${indexResp.statusText}`,
+    );
+  }
+  const indexData = await indexResp.json();
+  return indexData;
 };
 
 /**
@@ -548,6 +594,8 @@ export const getBalanceAndRate = async (
   zetaPrice: number;
   btcPrice: number;
 }> => {
+  isMainnet = await loadNetworkMode();
+
   try {
     if (request.params[0]) {
       const zetaAddr = convertToZeta(request.params[0]);

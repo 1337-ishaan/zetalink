@@ -9,6 +9,7 @@ import Arrow from '../utils/Arrow';
 import Typography from '../utils/Typography';
 import FlexColumnWrapper from '../utils/wrappers/FlexColumnWrapper';
 import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
+import { useStore } from '../../hooks/useStore';
 
 const TrxRowWrapper = styled(FlexRowWrapper)<{ isSent: boolean }>`
   align-items: center;
@@ -66,13 +67,20 @@ type TrxRowProps = {
   trx: any;
   isSent: boolean;
   amount: number;
+  tipHeight: number; // current block height for calculating confirmations
 };
 
-const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount }) => {
+const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount, tipHeight }) => {
+  const { globalState } = useStore();
   const [isCctxModalOpen, setIsCctxModalOpen] = useState(false);
   const [cctx, setCctx] = useState<any>({});
   const [isCctxClicked, setIsCctxClicked] = useState(false);
   const [cctxError, setCctxError] = useState('');
+
+  // Calculate confirmations: if confirmed, compute difference; otherwise zero
+  const confirmations = trx?.status?.block_height
+    ? tipHeight - trx.status.block_height + 1
+    : 0;
 
   const onCloseCctx = (isOpen: boolean) => {
     setCctx({});
@@ -80,19 +88,22 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount }) => {
   };
   const onTrackCctx = async (trxHash: string) => {
     setIsCctxModalOpen(true);
+    console.log(trxHash, 'trxHash');
 
     try {
       const cctxData: any = await trackCctx(trxHash);
-
+      console.log(cctxData, 'cctxData');
       if (cctxData) {
-        setCctx(cctxData?.CrossChainTx);
+        setCctx(cctxData?.CrossChainTxs[0]);
         setIsCctxModalOpen(true);
       }
-    } catch (error: any) {
-      setCctxError(error?.message);
+    } catch (error) {
+      const errMsg = (error as any)?.message ?? String(error);
+      setCctxError(errMsg);
       console.error('Error tracking cross-chain transaction:', error);
     }
   };
+  console.log(cctx, 'cctx');
   return (
     <>
       <TrxRowWrapper
@@ -109,7 +120,9 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount }) => {
             <Typography size={14} className="trx-hash">
               BTC trx:
               <a
-                href={`https://mempool.space/testnet/tx/${trx.txid}`}
+                href={`https://mempool.space/${
+                  globalState?.isMainnet ? '' : 'testnet4/'
+                }tx/${trx.txid}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -137,7 +150,7 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount }) => {
             className="status-pill"
             color={trx?.status?.confirmed ? '#ffffff' : 'yellow'}
           >
-            {trx?.status?.confirmed ? 'Confirmed' : `Pending`}
+            {confirmations} confirmation{confirmations !== 1 ? 's' : ''}
           </Typography>
         </FlexColumnWrapper>
       </TrxRowWrapper>

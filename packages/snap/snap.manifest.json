@@ -7,7 +7,7 @@
     "url": "git+https://github.com/1337-ishaan/zetalink"
   },
   "source": {
-    "shasum": "ugriuhaYeTZb4O7L0HUMpOPUX0ZGNA+tTXwIvNIZsJg=",
+    "shasum": "vX1NwqDljXYNyQuMNNtUXDVMFTU8KcQllgnpokOE+YM=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -19,17 +19,11 @@
   },
   "initialPermissions": {
     "snap_dialog": {},
+    "snap_manageState": {},
     "snap_manageAccounts": {},
     "snap_getBip32PublicKey": [
       {
-        "path": [
-          "m",
-          "44'",
-          "0'",
-          "0'",
-          "0",
-          "0"
-        ],
+        "path": ["m", "44'", "0'", "0'", "0", "0"],
         "curve": "secp256k1"
       }
     ],
@@ -43,17 +37,11 @@
     },
     "snap_getBip32Entropy": [
       {
-        "path": [
-          "m",
-          "44'",
-          "0'",
-          "0'",
-          "0",
-          "0"
-        ],
+        "path": ["m", "44'", "0'", "0'", "0", "0"],
         "curve": "secp256k1"
       }
     ]
   },
+  "platformVersion": "6.24.0",
   "manifestVersion": "0.1"
 }

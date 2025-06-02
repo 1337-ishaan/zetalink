@@ -39,6 +39,10 @@ export const connectSnap = async (
   }
 };
 
+
+
+
+
 export const disconnectSnap = async () => {
   try {
     await window.ethereum.request({
@@ -157,15 +161,7 @@ export const getBalanceAndRate = async (addr: string) => {
   console.trace('SNAPCALL --> getBalanceAndRate');
 
   try {
-    // Check if the snap is installed
-    // const snapIsInstalled = await window.ethereum.request({
-    //   method: 'wallet_getSnaps',
-    // }) as Record<string, unknown>; // Assert the type here
-
-    // if (!snapIsInstalled[defaultSnapOrigin]) {
-    //   throw new Error('Snap is not installed');
-    // }
-    // Invoke snap
+   
     const result = await window.ethereum.request({
       method: 'wallet_snap',
       params: {
@@ -182,7 +178,6 @@ export const getBalanceAndRate = async (addr: string) => {
 };
 
 export const getBtcFees = async () => {
-  console.trace('SNAPCALL --> getBtcFees');
   try {
     const result = await window.ethereum.request({
       method: 'wallet_snap',

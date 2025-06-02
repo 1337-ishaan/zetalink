@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import DOMPurify from 'dompurify';
 import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components/macro';
+import { JsonRpcProvider, formatEther } from 'ethers';
 
 import BalancePie from './charts/BalancePie';
 import EmptyBalance from './EmptyBalance';
@@ -13,12 +14,15 @@ import { satsToBtc } from '../../utils/satConverter';
 import TooltipInfo from '../utils/TooltipInfo';
 import Typography from '../utils/Typography';
 import FlexColumnWrapper from '../utils/wrappers/FlexColumnWrapper';
+import { EVM_CHAINS } from '../../config/evmChains';
+import { getChainIcon } from '../../constants/getChainIcon';
 
 type BalanceData = {
   label: string;
   value: number;
   usdPrice?: number | null;
   icon_url?: string | null;
+  chainId?: number;
 };
 
 type NonZetaToken = {
@@ -157,23 +161,48 @@ const Balances = ({}: BalancesProps): JSX.Element => {
               }))
             : [];
 
+          // Fetch native balances for all supported EVM chains via Infura RPC
+          const otherEvmDataRaw: (BalanceData | null)[] = await Promise.all(
+            EVM_CHAINS.map(
+              async (chain): Promise<BalanceData | null> => {
+                const provider = new JsonRpcProvider(chain.rpcUrl);
+                const balanceBN = await provider.getBalance(
+                  globalState.evmAddress as string,
+                );
+                const value = parseFloat(formatEther(balanceBN));
+                if (value <= 0) {
+                  return null;
+                }
+                const priceRes = await fetch(
+                  `https://api.coingecko.com/api/v3/simple/price?ids=${chain.geckoId}&vs_currencies=usd`,
+                );
+                const priceData = await priceRes.json();
+                return {
+                  label: chain.symbol,
+                  value,
+                  usdPrice: value * priceData[chain.geckoId].usd,
+                  icon_url: null,
+                  chainId: chain.chainId,
+                };
+              },
+            ),
+          );
+          const otherEvmData: BalanceData[] = otherEvmDataRaw.filter(
+            (b): b is BalanceData => b !== null,
+          );
+
           if (
             Array.isArray(result.nonZeta) &&
             result.zeta.balances.length === 0 &&
             result.nonZeta.length === 0
           ) {
             setData([
-              {
-                label: 'BTC',
-                value: 0,
-              },
-              {
-                label: 'ZETA',
-                value: 0,
-              },
+              { label: 'BTC', value: 0 },
+              { label: 'ZETA', value: 0 },
+              ...otherEvmData,
             ]);
           } else {
-            setData([
+            const baseData: BalanceData[] = [
               {
                 label: 'BTC',
                 value: satsToBtc(globalState.utxo),
@@ -181,16 +210,15 @@ const Balances = ({}: BalancesProps): JSX.Element => {
               },
               ...maps,
               {
-                label: result?.zeta?.balances[0]?.denom
-                  ? result.zeta.balances[0]?.denom
-                  : 'ZETA',
+                label: result?.zeta?.balances[0]?.denom ?? 'ZETA',
                 value: result?.zeta?.balances[0]?.amount
                   ? result.zeta.balances[0]?.amount / 1e18
                   : 0,
                 usdPrice:
                   (result.zeta.balances[0]?.amount! / 1e18) * result.zetaPrice,
               },
-            ]);
+            ];
+            setData([...baseData, ...otherEvmData]);
           }
           setError(null);
         } catch (err) {
@@ -263,6 +291,14 @@ const Balances = ({}: BalancesProps): JSX.Element => {
                       <Typography size={14}>
                         {item.label === 'BTC' ? (
                           <BtcIcon className="chain-icon" />
+                        ) : item.chainId ? (
+                          <img
+                            src={
+                              (getChainIcon(item.chainId) as unknown) as string
+                            }
+                            className="chain-icon"
+                            alt={item.label}
+                          />
                         ) : (
                           <ZetaIcon className="chain-icon" />
                         )}

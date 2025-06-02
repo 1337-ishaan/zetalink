@@ -1,6 +1,13 @@
 import Decimal from 'decimal.js';
 import React, { useState } from 'react';
-import { PieChart, Pie, Sector, ResponsiveContainer } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Sector,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+} from 'recharts';
 
 // Define the structure of the pie segment data
 type PieData = {
@@ -130,17 +137,27 @@ const BalancePie = ({ data }: BalancePieProps) => {
     >
       <PieChart width={500}>
         <Pie
-          activeIndex={activeIndex} // Highlight active segment
+          activeIndex={activeIndex}
           // @ts-ignore
-
-          activeShape={renderActiveShape} // Custom active shape
-          data={data} // Pie data
-          innerRadius={50} // Inner radius
-          outerRadius={75} // Outer radius
-          cy={105} // Center Y position
-          fill="#4db852" // Default fill color
-          dataKey="usdPrice" // Key for data values
-          onMouseEnter={onPieEnter} // Mouse enter handler
+          activeShape={renderActiveShape}
+          data={data}
+          innerRadius={50}
+          outerRadius={75}
+          cy={105}
+          fill="#4db852"
+          dataKey="usdPrice"
+          onMouseEnter={onPieEnter}
+        />
+        <Tooltip
+          formatter={(value: number) => [`$${value.toFixed(2)}`, 'USD Value']}
+        />
+        <Legend
+          layout="vertical"
+          align="right"
+          verticalAlign="middle"
+          formatter={(value: any) => (
+            <span style={{ color: '#fff' }}>{value}</span>
+          )}
         />
       </PieChart>
     </ResponsiveContainer>

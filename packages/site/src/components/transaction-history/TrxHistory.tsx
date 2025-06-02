@@ -99,6 +99,7 @@ const TrxHistory: React.FC = () => {
   const { globalState, setGlobalState } = useContext(StoreContext);
   const [isRefetched, setIsRefetched] = useState(false);
   const [filter, setFilter] = useState<'SENT' | 'RECEIVED' | ''>('');
+  const [tipHeight, setTipHeight] = useState<number>(0);
 
   useEffect(() => {
     if (
@@ -112,6 +113,14 @@ const TrxHistory: React.FC = () => {
         try {
           const results: any = await getBtcTrxs();
           const utxo: any = await getBtcUtxo();
+
+          const endpoint = globalState?.isMainnet
+            ? 'https://mempool.space/api'
+            : 'https://mempool.space/testnet4/api';
+          const tipRes = await fetch(`${endpoint}/blocks/tip/height`);
+          const fetchedTipHeight = parseInt(await tipRes.text(), 10);
+          setTipHeight(fetchedTipHeight);
+
           setGlobalState({
             ...globalState,
             btcTrxs: results,
@@ -187,10 +196,10 @@ const TrxHistory: React.FC = () => {
         <Loader />
       ) : (
         globalState?.btcTrxs?.map((trx: any, index: number) => {
-          const isSent = trx.vout.some(
-            (vout: any) =>
-              vout.scriptpubkey_address ===
-              'tb1qy9pqmk2pd9sv63g27jt8r657wy0d9ueeh0nqur',
+          const isSent = trx.vout.some((vout: any) =>
+            vout.scriptpubkey_address === globalState?.isMainnet
+              ? 'bc1qm24wp577nk8aacckv8np465z3dvmu7ry45el6y'
+              : 'tb1qy9pqmk2pd9sv63g27jt8r657wy0d9ueeh0nqur',
           );
 
           const shouldRender =
@@ -198,13 +207,13 @@ const TrxHistory: React.FC = () => {
 
           return (
             shouldRender && (
-              <FlexColumnWrapper className="trx-row-wrapper">
+              <FlexColumnWrapper className="trx-row-wrapper" key={index}>
                 {index < 25 && (
                   <TrxRow
-                    key={index}
                     trx={trx}
                     isSent={isSent}
                     amount={getAmount(trx)}
+                    tipHeight={tipHeight}
                   />
                 )}
               </FlexColumnWrapper>
