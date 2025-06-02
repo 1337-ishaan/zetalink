@@ -11,6 +11,7 @@ import TooltipInfo from '../utils/TooltipInfo';
 import Typography from '../utils/Typography';
 import FlexColumnWrapper from '../utils/wrappers/FlexColumnWrapper';
 import FlexRowWrapper from '../utils/wrappers/FlexRowWrapper';
+import { MAINNET_ZETA_TSS, TESTNET_ZETA_TSS } from '../../constants';
 
 const TrxHistoryWrapper = styled.div`
   background: ${(props) => props.theme.colors.dark?.default};
@@ -100,6 +101,15 @@ const TrxHistory: React.FC = () => {
   const [isRefetched, setIsRefetched] = useState(false);
   const [filter, setFilter] = useState<'SENT' | 'RECEIVED' | ''>('');
   const [tipHeight, setTipHeight] = useState<number>(0);
+  const [isManualRefresh, setIsManualRefresh] = useState(false);
+
+  // Poll for new transactions every 15 seconds
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setIsRefetched(true);
+    }, 15000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     if (
@@ -130,6 +140,7 @@ const TrxHistory: React.FC = () => {
           console.error(error);
         } finally {
           setIsRefetched(false);
+          setIsManualRefresh(false); // Reset manual refresh after fetch
         }
       };
       getBtcTrx();
@@ -147,7 +158,7 @@ const TrxHistory: React.FC = () => {
     return trx?.vout?.find(
       (t: any) =>
         t.scriptpubkey_address ===
-          'tb1qy9pqmk2pd9sv63g27jt8r657wy0d9ueeh0nqur' ||
+          (globalState?.isMainnet ? MAINNET_ZETA_TSS : TESTNET_ZETA_TSS) ||
         t.scriptpubkey_address === globalState?.btcAddress,
     )?.value;
   };
@@ -180,7 +191,10 @@ const TrxHistory: React.FC = () => {
           />
           <RefreshIcon
             className="refresh-icon"
-            onClick={() => setIsRefetched(true)}
+            onClick={() => {
+              setIsManualRefresh(true);
+              setIsRefetched(true);
+            }}
           />
         </FlexRowWrapper>
       </FlexRowWrapper>
@@ -192,14 +206,14 @@ const TrxHistory: React.FC = () => {
           </Typography>
         </div>
       )}
-      {isRefetched ? (
+      {isManualRefresh ? (
         <Loader />
       ) : (
         globalState?.btcTrxs?.map((trx: any, index: number) => {
-          const isSent = trx.vout.some((vout: any) =>
-            vout.scriptpubkey_address === globalState?.isMainnet
-              ? 'bc1qm24wp577nk8aacckv8np465z3dvmu7ry45el6y'
-              : 'tb1qy9pqmk2pd9sv63g27jt8r657wy0d9ueeh0nqur',
+          const isSent = trx.vout.some(
+            (vout: any) =>
+              vout.scriptpubkey_address ===
+              (globalState?.isMainnet ? MAINNET_ZETA_TSS : TESTNET_ZETA_TSS),
           );
 
           const shouldRender =

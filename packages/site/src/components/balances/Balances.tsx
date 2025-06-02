@@ -54,6 +54,8 @@ const BalancesWrapper = styled(FlexColumnWrapper)`
   box-shadow: 0px 0px 21px 5px rgba(0, 0, 0, 1);
   border-radius: ${(props) => props.theme.borderRadius};
   width: 500px;
+  max-height: 594px;
+  overflow-y: auto;
 
   .input-container {
     position: relative;
@@ -126,6 +128,26 @@ const BalancesWrapper = styled(FlexColumnWrapper)`
   }
 `;
 
+const ScrollableTbody = styled.tbody`
+  display: block;
+  max-height: 200px; /* Adjust as needed */
+  overflow-y: auto;
+  width: 100%;
+  // padding-bottom: 24px; /* Add bottom padding */
+`;
+
+const StyledThead = styled.thead`
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+`;
+
+const StyledTr = styled.tr`
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+`;
+
 type BalancesProps = {};
 
 const Balances = ({}: BalancesProps): JSX.Element => {
@@ -174,13 +196,13 @@ const Balances = ({}: BalancesProps): JSX.Element => {
                   return null;
                 }
                 const priceRes = await fetch(
-                  `https://api.coingecko.com/api/v3/simple/price?ids=${chain.geckoId}&vs_currencies=usd`,
+                  `https://api.binance.com/api/v3/avgPrice?symbol=${chain.symbol}USDT`,
                 );
                 const priceData = await priceRes.json();
                 return {
                   label: chain.symbol,
                   value,
-                  usdPrice: value * priceData[chain.geckoId].usd,
+                  usdPrice: value * priceData.price,
                   icon_url: null,
                   chainId: chain.chainId,
                 };
@@ -242,7 +264,8 @@ const Balances = ({}: BalancesProps): JSX.Element => {
     }
   };
 
-  console.log(searched, data, 'searched data');
+  console.log(searched, data, 'sd');
+
   return (
     <BalancesWrapper>
       <Typography size={24}>
@@ -279,19 +302,25 @@ const Balances = ({}: BalancesProps): JSX.Element => {
             )}
             <BalancePie data={data} />
             <table>
-              <thead>
-                <tr>
+              <StyledThead>
+                <StyledTr>
                   <th>Asset</th>
                   <th>Amount</th>
                   <th>Amount ($)</th>
-                </tr>
-              </thead>
-              <tbody>
+                </StyledTr>
+              </StyledThead>
+              <ScrollableTbody>
                 {(searched.length > 0 ? searched : data).map((item, index) => (
-                  <tr key={index}>
+                  <StyledTr key={index}>
                     <td>
                       <Typography size={14}>
-                        {item.label === 'BTC' ? (
+                        {item.icon_url ? (
+                          <img
+                            src={item.icon_url}
+                            className="chain-icon"
+                            alt={item.label}
+                          />
+                        ) : item.label === 'BTC' ? (
                           <BtcIcon className="chain-icon" />
                         ) : item.chainId ? (
                           <img
@@ -321,19 +350,17 @@ const Balances = ({}: BalancesProps): JSX.Element => {
                       </Typography>
                     </td>
                     <td>
-                      {!globalState.isMainnet
-                        ? 0
-                        : parseFloat(item.usdPrice!.toString()).toLocaleString(
-                            undefined,
-                            {
-                              minimumSignificantDigits: 1,
-                              maximumSignificantDigits: 8,
-                            },
-                          )}
+                      {parseFloat(item.usdPrice!.toString()).toLocaleString(
+                        undefined,
+                        {
+                          minimumSignificantDigits: 1,
+                          maximumSignificantDigits: 8,
+                        },
+                      )}
                     </td>
-                  </tr>
+                  </StyledTr>
                 ))}
-              </tbody>
+              </ScrollableTbody>
             </table>
           </>
         ) : (

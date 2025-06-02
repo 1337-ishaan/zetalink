@@ -566,15 +566,12 @@ export const trackCctxTx = async (request: any): Promise<any> => {
   }
   const txHash = trimHexPrefix(rawHash);
   const baseUrl = isMainnet ? MAINNET_ZETA_BLOCKPI : TESTNET_ZETA_BLOCKPI;
-  const projectId = 'afa7758ad026d7ae54ff629af5883f53bdd82d73';
 
   // Fetch CCTX index using inbound transaction hash
   const indexUrl = `${baseUrl}/public/zeta-chain/crosschain/inboundHashToCctxData/${txHash}`;
   const indexResp = await fetch(indexUrl);
   if (!indexResp.ok) {
-    throw new Error(
-      `Failed to fetch CCTX index from ${indexUrl}: ${indexResp.status} ${indexResp.statusText}`,
-    );
+    throw new Error(`Failed to track crosschain transaction`);
   }
   const indexData = await indexResp.json();
   return indexData;
@@ -627,10 +624,10 @@ export const getBalanceAndRate = async (
 
       try {
         const currentBtcPriceResponse = await fetch(
-          'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',
+          'https://api.binance.com/api/v3/avgPrice?symbol=BTCUSDT',
         );
         const btcPriceData = await currentBtcPriceResponse.json();
-        btcPrice = btcPriceData.bitcoin.usd;
+        btcPrice = btcPriceData.price;
       } catch (error) {
         console.error('Error fetching BTC price:', error);
         btcPrice = 0;

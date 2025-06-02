@@ -7,12 +7,14 @@ import {
   ResponsiveContainer,
   Legend,
   Tooltip,
+  Cell,
 } from 'recharts';
 
 // Define the structure of the pie segment data
-type PieData = {
+export type PieData = {
   label: string; // Segment label
   value: number; // Segment value
+  usdPrice?: number | null; // USD value for segment
 };
 
 // Props for the BalancePie component
@@ -121,6 +123,20 @@ const renderActiveShape = (props: RenderActiveShapeProps) => {
 // Main component for the balance pie chart
 const BalancePie = ({ data }: BalancePieProps) => {
   const [activeIndex, setActiveIndex] = useState(0); // Track active segment
+  // Modern color palette for pie segments
+  const COLORS = [
+    '#0088FE',
+    '#00C49F',
+    '#FFBB28',
+    '#FF8042',
+    '#AF19FF',
+    '#F83F21',
+    '#FFC300',
+    '#C70039',
+    '#900C3F',
+    '#581845',
+  ];
+  // Total USD value for center label
 
   // Handle mouse enter event
   const onPieEnter = (
@@ -136,6 +152,21 @@ const BalancePie = ({ data }: BalancePieProps) => {
       height={250} // Fixed height for chart visibility
     >
       <PieChart width={500}>
+        <defs>
+          {COLORS.map((color, index) => (
+            <linearGradient
+              id={`colorGrad${index}`}
+              key={index}
+              x1="0%"
+              y1="0%"
+              x2="0%"
+              y2="100%"
+            >
+              <stop offset="0%" stopColor={color} stopOpacity={0.9} />
+              <stop offset="100%" stopColor={color} stopOpacity={0.6} />
+            </linearGradient>
+          ))}
+        </defs>
         <Pie
           activeIndex={activeIndex}
           // @ts-ignore
@@ -144,19 +175,50 @@ const BalancePie = ({ data }: BalancePieProps) => {
           innerRadius={50}
           outerRadius={75}
           cy={105}
-          fill="#4db852"
           dataKey="usdPrice"
+          nameKey="label"
           onMouseEnter={onPieEnter}
-        />
+          isAnimationActive={true}
+          animationDuration={800}
+          animationEasing="ease-out"
+          label={({ cx, cy }) => (
+            <text
+              x={cx}
+              y={cy}
+              dy={8}
+              textAnchor="middle"
+              fill="#fff"
+              style={{ fontSize: '16px', fontWeight: 'bold' }}
+            >
+              {/* {`$${totalUsd.toFixed(2)}`} */}
+            </text>
+          )}
+          labelLine={false}
+        >
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={`url(#colorGrad${index})`} />
+          ))}
+        </Pie>
         <Tooltip
+          contentStyle={{
+            backgroundColor: '#1a1a1a',
+            border: 'none',
+            borderRadius: '8px',
+            boxShadow: '0 0 10px rgba(0, 0, 0, 0.5)',
+          }}
+          itemStyle={{ color: '#fff' }}
+          cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
           formatter={(value: number) => [`$${value.toFixed(2)}`, 'USD Value']}
         />
         <Legend
-          layout="vertical"
-          align="right"
-          verticalAlign="middle"
+          layout="horizontal"
+          align="center"
+          verticalAlign="bottom"
+          iconType="circle"
+          iconSize={8}
+          wrapperStyle={{ paddingTop: 16 }}
           formatter={(value: any) => (
-            <span style={{ color: '#fff' }}>{value}</span>
+            <span style={{ color: '#fff', marginRight: 8 }}>{value}</span>
           )}
         />
       </PieChart>

@@ -9,7 +9,7 @@ import { ReactComponent as RedirectIcon } from '../../assets/redirect.svg';
 import {
   ZETA_MAINNET_BLOCKPI_API_URL,
   ZETA_TESTNET_BLOCKPI_API_URL,
-} from '../../constants/api';
+} from '../../constants';
 import { getChainIcon } from '../../constants/getChainIcon';
 import { getBtcFees, transactBtc } from '../../utils/snap';
 import StyledButton from '../utils/StyledButton';
@@ -141,6 +141,7 @@ const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
   const [depositFees, setDepositFees] = useState<any>();
   const { globalState, setGlobalState } = useContext(StoreContext);
 
+  console.log(ZRC20Assets, 'zrc20');
   const sendTrx = async () => {
     setIsTrxProcessing(true);
     toast('Processing...', {
