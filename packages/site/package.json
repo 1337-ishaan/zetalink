@@ -47,7 +47,7 @@
     "react-toastify": "10.0.5",
     "recharts": "2.12.7",
     "styled-components": "5.3.3",
-    "zetalink": "0.1.9"
+    "zetalink": "0.2.0"
   },
   "devDependencies": {
     "@metamask/eslint-config": "^13.0.0",
