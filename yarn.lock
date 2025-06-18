@@ -20284,7 +20284,7 @@ __metadata:
     rimraf: 3.0.2
     styled-components: 5.3.3
     typescript: ^5.5.4
-    zetalink: 0.2.0
+    zetalink: "workspace:^"
   languageName: unknown
   linkType: soft
 
@@ -23073,7 +23073,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zetalink@0.2.0, zetalink@workspace:^, zetalink@workspace:packages/snap":
+"zetalink@workspace:^, zetalink@workspace:packages/snap":
   version: 0.0.0-use.local
   resolution: "zetalink@workspace:packages/snap"
   dependencies:
