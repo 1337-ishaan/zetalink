@@ -27,14 +27,14 @@ export const connectSnap = async (
   snapId: string = defaultSnapOrigin,
   params: Record<'version' | string, unknown> = {},
 ) => {
-  console.log('SNAPCALL --> connectSnap');
+  // console\.log\(.*?\);+?
   try {
     await window.ethereum.request({
       method: 'wallet_requestSnaps',
       params: { [snapId]: params },
     });
   } catch (error) {
-    console.log('SNAPCALL --> connectSnap error', error);
+    // console\.log\(.*?\);+?
     throw error;
   }
 };
@@ -73,7 +73,7 @@ export const getSnap = async (version?: string): Promise<Snap | undefined> => {
         snap.id === defaultSnapOrigin && (!version || snap.version === version),
     );
   } catch (error) {
-    console.log('Failed to obtain installed snap', error);
+    // console\.log\(.*?\);+?
     return undefined;
   }
 };
@@ -143,7 +143,7 @@ export const transactBtc = async (
 };
 
 export const trackCctx = async (trxHash: string) => {
-  console.log(trxHash, 'trxHash ion snap');
+  // console\.log\(.*?\);+?
   try {
     const result = await window.ethereum.request({
       method: 'wallet_snap',

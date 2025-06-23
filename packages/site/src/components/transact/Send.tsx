@@ -141,7 +141,7 @@ const Send = ({ setIsSendModalOpen }: SendProps): JSX.Element => {
   const [depositFees, setDepositFees] = useState<any>();
   const { globalState, setGlobalState } = useContext(StoreContext);
 
-  console.log(ZRC20Assets, 'zrc20');
+  // console\.log\(.*?\);+?
   const sendTrx = async () => {
     setIsTrxProcessing(true);
     toast('Processing...', {

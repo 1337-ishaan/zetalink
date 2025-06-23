@@ -123,7 +123,7 @@ const Header = ({}: HeaderProps): JSX.Element => {
 
   // Connect to the Zeta snap
   const onConnectSnap = async (isMainnet: boolean) => {
-    console.log('Connecting to Zeta snap');
+    // console\.log\(.*?\);+?
     try {
       await connectSnap();
       setIsSnapInstalled(true);

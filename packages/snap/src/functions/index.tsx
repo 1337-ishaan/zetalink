@@ -175,7 +175,7 @@ export const getFees = async (): Promise<{
       throw new Error('Failed to fetch depositFees.');
     }
     const feeData = await fee.json();
-    console.log('feeData', feeData);
+    // console\.log\(.*?\);+?
     return {
       btcFees: feeData.fastestFee,
       zetaDepositFees: feeData.fastestFee * 1000 * 68 * 2,
@@ -388,7 +388,7 @@ export const transactBtc = async (request: any): Promise<string> => {
           throw new Error('Addresses must contain valid hex characters only');
         }
 
-        console.log('Address validation passed');
+        // console\.log\(.*?\);+?
         if (ZRC20ContractAddress) {
           // Just the params the contract expects - no contract address or action code
           generatedMemo = `${trimmedOmnichainContract}${trimmedSanitizedZRC20ContractAddress}${trimmedSanitizedRecipientAddress}`;

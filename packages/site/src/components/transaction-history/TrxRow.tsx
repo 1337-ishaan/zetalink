@@ -103,7 +103,6 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount, tipHeight }) => {
       console.error('Error tracking cross-chain transaction:', error);
     }
   };
-  console.log(cctx, 'cctx');
   return (
     <>
       <TrxRowWrapper
@@ -145,13 +144,15 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount, tipHeight }) => {
               : parseFloat((amount / 1e8).toFixed(8)).toString()}{' '}
             BTC
           </Typography>
-          <Typography
-            size={12}
-            className="status-pill"
-            color={trx?.status?.confirmed ? '#ffffff' : 'yellow'}
-          >
-            {confirmations} confirmation{confirmations !== 1 ? 's' : ''}
-          </Typography>
+          {confirmations >= 0 && (
+            <Typography
+              size={12}
+              className="status-pill"
+              color={trx?.status?.confirmed ? '#ffffff' : 'yellow'}
+            >
+              {confirmations} confirmation{confirmations !== 1 ? 's' : ''}
+            </Typography>
+          )}
         </FlexColumnWrapper>
       </TrxRowWrapper>
       {isSent && isCctxModalOpen ? (

@@ -264,7 +264,7 @@ const Balances = ({}: BalancesProps): JSX.Element => {
     }
   };
 
-  console.log(searched, data, 'sd');
+  // console\.log\(.*?\);+?
 
   return (
     <BalancesWrapper>
@@ -316,6 +316,7 @@ const Balances = ({}: BalancesProps): JSX.Element => {
                       <Typography size={14}>
                         {item.icon_url ? (
                           <img
+                            style={{ width: '24px', height: '24px' }}
                             src={item.icon_url}
                             className="chain-icon"
                             alt={item.label}
