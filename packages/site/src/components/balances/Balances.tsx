@@ -55,11 +55,12 @@ const BalancesWrapper = styled(FlexColumnWrapper)`
   border-radius: ${(props) => props.theme.borderRadius};
   width: 500px;
   max-height: 594px;
-  overflow-y: auto;
+  overflow-y: hidden;
 
   .input-container {
     position: relative;
     display: inline-block;
+    width: fit-content;
 
     .searched-input {
       outline: none;
@@ -68,7 +69,7 @@ const BalancesWrapper = styled(FlexColumnWrapper)`
       border: none;
       background: rgba(12, 12, 12, 0.8);
       color: #fff;
-      width: 40%;
+      width: 100%;
       font-size: 16px;
       margin-top: 24px;
     }
@@ -124,13 +125,14 @@ const BalancesWrapper = styled(FlexColumnWrapper)`
   .balance-pie-container {
     width: 100%;
     height: 100%;
+    overflow: visible;
     justify-content: space-between;
   }
 `;
 
 const ScrollableTbody = styled.tbody`
   display: block;
-  max-height: 200px; /* Adjust as needed */
+  max-height: 170px; /* Adjust as needed */
   overflow-y: auto;
   width: 100%;
   // padding-bottom: 24px; /* Add bottom padding */

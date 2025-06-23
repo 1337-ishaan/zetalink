@@ -149,9 +149,14 @@ const BalancePie = ({ data }: BalancePieProps) => {
   return (
     <ResponsiveContainer
       width="100%" // Responsive width
-      height={250} // Fixed height for chart visibility
+      height={275} // Fixed height for chart visibility
+      style={{ overflow: 'visible' }}
     >
-      <PieChart width={500}>
+      <PieChart
+        width={500}
+        margin={{ top: 0, right: 0, bottom: 0, left: 0 }} // add margin to accommodate labels
+        style={{ overflow: 'visible' }}
+      >
         <defs>
           {COLORS.map((color, index) => (
             <linearGradient

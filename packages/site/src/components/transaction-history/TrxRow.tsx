@@ -77,7 +77,7 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount, tipHeight }) => {
   const [isCctxClicked, setIsCctxClicked] = useState(false);
   const [cctxError, setCctxError] = useState('');
 
-  // Calculate confirmations: if confirmed, compute difference; otherwise zero
+  // Calculate confirmations: if confirmed and tipHeight >= block height, compute difference; otherwise zero
   const confirmations = trx?.status?.block_height
     ? tipHeight - trx.status.block_height + 1
     : 0;
@@ -105,46 +105,46 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount, tipHeight }) => {
   };
   return (
     <>
-      <TrxRowWrapper
-        isSent={isSent}
-        aria-disabled={isCctxClicked}
-        onClick={async () => onTrackCctx(trx.txid)}
-      >
-        <FlexRowWrapper className="trx-hash-wrapper">
-          <Arrow isReceived={!isSent} />
-          <FlexColumnWrapper className="info-column type-hash-wrapper">
-            <Typography size={16} color={isSent ? '#ff4a3d' : '#008462'}>
-              {isSent ? 'Sent' : 'Received'}
-            </Typography>
-            <Typography size={14} className="trx-hash">
-              BTC trx:
-              <a
-                href={`https://mempool.space/${
-                  globalState?.isMainnet ? '' : 'testnet4/'
-                }tx/${trx.txid}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {trimHexAddress(trx.txid)}
-                <RedirectIcon className="redirect-icon" />
-              </a>
-            </Typography>
-          </FlexColumnWrapper>
-        </FlexRowWrapper>
+      {confirmations >= 0 ? (
+        <TrxRowWrapper
+          isSent={isSent}
+          aria-disabled={isCctxClicked}
+          onClick={async () => onTrackCctx(trx.txid)}
+        >
+          <FlexRowWrapper className="trx-hash-wrapper">
+            <Arrow isReceived={!isSent} />
+            <FlexColumnWrapper className="info-column type-hash-wrapper">
+              <Typography size={16} color={isSent ? '#ff4a3d' : '#008462'}>
+                {isSent ? 'Sent' : 'Received'}
+              </Typography>
+              <Typography size={14} className="trx-hash">
+                BTC trx:
+                <a
+                  href={`https://mempool.space/${
+                    globalState?.isMainnet ? '' : 'testnet4/'
+                  }tx/${trx.txid}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {trimHexAddress(trx.txid)}
+                  <RedirectIcon className="redirect-icon" />
+                </a>
+              </Typography>
+            </FlexColumnWrapper>
+          </FlexRowWrapper>
 
-        <FlexColumnWrapper className="info-column amount-status-wrapper">
-          <Typography
-            className="t-trx-amount"
-            size={14}
-            color={!isSent ? '#008462' : '#ff4a3d'}
-          >
-            {isSent ? '-' : '+'}
-            {isNaN(amount / 1e8)
-              ? '0'
-              : parseFloat((amount / 1e8).toFixed(8)).toString()}{' '}
-            BTC
-          </Typography>
-          {confirmations >= 0 && (
+          <FlexColumnWrapper className="info-column amount-status-wrapper">
+            <Typography
+              className="t-trx-amount"
+              size={14}
+              color={!isSent ? '#008462' : '#ff4a3d'}
+            >
+              {isSent ? '-' : '+'}
+              {isNaN(amount / 1e8)
+                ? '0'
+                : parseFloat((amount / 1e8).toFixed(8)).toString()}{' '}
+              BTC
+            </Typography>
             <Typography
               size={12}
               className="status-pill"
@@ -152,9 +152,15 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount, tipHeight }) => {
             >
               {confirmations} confirmation{confirmations !== 1 ? 's' : ''}
             </Typography>
-          )}
-        </FlexColumnWrapper>
-      </TrxRowWrapper>
+          </FlexColumnWrapper>
+        </TrxRowWrapper>
+      ) : (
+        <div className="no-transactions">
+          <Typography size={22} weight={500}>
+            No transactions found 📭
+          </Typography>
+        </div>
+      )}
       {isSent && isCctxModalOpen ? (
         <CCTXModal
           cctx={cctx}
