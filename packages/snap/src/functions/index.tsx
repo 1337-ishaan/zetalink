@@ -169,13 +169,12 @@ export const getFees = async (): Promise<{
   try {
     const fee = await fetch(
       `${isMainnet ? MAINNET_MEMPOOL : TESTNET_MEMPOOL}/v1/fees/recommended`,
-      // `${isMainnet ? MAINNET_BLOCKCYPHER_API : TESTNET_BLOCKCYPHER_API}`,
     );
     if (!fee.ok) {
       throw new Error('Failed to fetch depositFees.');
     }
     const feeData = await fee.json();
-    // console\.log\(.*?\);+?
+    console.log('feeData', feeData);
     return {
       btcFees: feeData.fastestFee,
       zetaDepositFees: feeData.fastestFee * 1000 * 68 * 2,
@@ -302,11 +301,13 @@ export const transactBtc = async (request: any): Promise<string> => {
     params: {
       ui: (
         <Box>
-          <Heading>Confirm CCTX BTC transaction:</Heading>
-          <Text>Transfer Amount - {`${transferAmountRaw}`} BTC</Text>
-          <Text>ZRC20 Contract Address - {`${ZRC20ContractAddress}`}</Text>
-          <Text>Recipient Address - {`${recipientAddress}`}</Text>
-          <Text>Deposit Fees - {`${satsToBtc(depositFeeRaw)}`} BTC</Text>
+          <Heading>Confirm Cross-Chain Transaction</Heading>
+          <Text>Amount to Send: {`${transferAmountRaw}`} BTC</Text>
+          {ZRC20ContractAddress && (
+            <Text>Destination Token Contract: {`${ZRC20ContractAddress}`}</Text>
+          )}
+          <Text>Receiving Address: {`${recipientAddress}`}</Text>
+          <Text>Network Fee: {`${satsToBtc(depositFeeRaw)}`} BTC</Text>
         </Box>
       ),
     },
@@ -370,9 +371,12 @@ export const transactBtc = async (request: any): Promise<string> => {
         const trimmedSanitizedRecipientAddress = trimHexPrefix(
           recipientAddress,
         );
-        const trimmedSanitizedZRC20ContractAddress = trimHexPrefix(
-          ZRC20ContractAddress,
-        );
+        let trimmedSanitizedZRC20ContractAddress;
+        if (ZRC20ContractAddress) {
+          trimmedSanitizedZRC20ContractAddress = trimHexPrefix(
+            ZRC20ContractAddress,
+          );
+        }
         const trimmedOmnichainContract = trimHexPrefix(
           isMainnet
             ? MAINNET_OMNICHAIN_SWAP_CONTRACT_ADDRESS
@@ -382,13 +386,14 @@ export const transactBtc = async (request: any): Promise<string> => {
         const isValidHex = (str: string) => /^[0-9a-f]*$/i.test(str);
         if (
           !isValidHex(trimmedSanitizedRecipientAddress) ||
-          !isValidHex(trimmedSanitizedZRC20ContractAddress) ||
-          !isValidHex(trimmedOmnichainContract)
+          (ZRC20ContractAddress &&
+            !isValidHex(trimmedSanitizedZRC20ContractAddress!)) ||
+          (ZRC20ContractAddress && !isValidHex(trimmedOmnichainContract))
         ) {
           throw new Error('Addresses must contain valid hex characters only');
         }
 
-        // console\.log\(.*?\);+?
+        // console.log('Address validation passed');
         if (ZRC20ContractAddress) {
           // Just the params the contract expects - no contract address or action code
           generatedMemo = `${trimmedOmnichainContract}${trimmedSanitizedZRC20ContractAddress}${trimmedSanitizedRecipientAddress}`;
@@ -400,7 +405,7 @@ export const transactBtc = async (request: any): Promise<string> => {
           generatedMemo = trimmedSanitizedRecipientAddress;
         }
       } catch {
-        throw new Error('Error creating memo, please try again');
+        throw new Error('Error creating memo');
       }
 
       if (!btcAddress) {

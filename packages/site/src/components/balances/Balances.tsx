@@ -353,13 +353,15 @@ const Balances = ({}: BalancesProps): JSX.Element => {
                       </Typography>
                     </td>
                     <td>
-                      {parseFloat(item.usdPrice!.toString()).toLocaleString(
-                        undefined,
-                        {
-                          minimumSignificantDigits: 1,
-                          maximumSignificantDigits: 8,
-                        },
-                      )}
+                      {item.value > 0
+                        ? parseFloat(item.usdPrice!.toString()).toLocaleString(
+                            undefined,
+                            {
+                              minimumSignificantDigits: 1,
+                              maximumSignificantDigits: 8,
+                            },
+                          )
+                        : 0}
                     </td>
                   </StyledTr>
                 ))}

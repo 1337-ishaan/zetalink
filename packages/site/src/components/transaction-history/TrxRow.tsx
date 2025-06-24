@@ -105,62 +105,62 @@ const TrxRow: React.FC<TrxRowProps> = ({ trx, isSent, amount, tipHeight }) => {
   };
   return (
     <>
-      {confirmations >= 0 ? (
-        <TrxRowWrapper
-          isSent={isSent}
-          aria-disabled={isCctxClicked}
-          onClick={async () => onTrackCctx(trx.txid)}
-        >
-          <FlexRowWrapper className="trx-hash-wrapper">
-            <Arrow isReceived={!isSent} />
-            <FlexColumnWrapper className="info-column type-hash-wrapper">
-              <Typography size={16} color={isSent ? '#ff4a3d' : '#008462'}>
-                {isSent ? 'Sent' : 'Received'}
-              </Typography>
-              <Typography size={14} className="trx-hash">
-                BTC trx:
-                <a
-                  href={`https://mempool.space/${
-                    globalState?.isMainnet ? '' : 'testnet4/'
-                  }tx/${trx.txid}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {trimHexAddress(trx.txid)}
-                  <RedirectIcon className="redirect-icon" />
-                </a>
-              </Typography>
-            </FlexColumnWrapper>
-          </FlexRowWrapper>
-
-          <FlexColumnWrapper className="info-column amount-status-wrapper">
-            <Typography
-              className="t-trx-amount"
-              size={14}
-              color={!isSent ? '#008462' : '#ff4a3d'}
-            >
-              {isSent ? '-' : '+'}
-              {isNaN(amount / 1e8)
-                ? '0'
-                : parseFloat((amount / 1e8).toFixed(8)).toString()}{' '}
-              BTC
+      {/* {confirmations >= 0 ? ( */}
+      <TrxRowWrapper
+        isSent={isSent}
+        aria-disabled={isCctxClicked}
+        onClick={async () => onTrackCctx(trx.txid)}
+      >
+        <FlexRowWrapper className="trx-hash-wrapper">
+          <Arrow isReceived={!isSent} />
+          <FlexColumnWrapper className="info-column type-hash-wrapper">
+            <Typography size={16} color={isSent ? '#ff4a3d' : '#008462'}>
+              {isSent ? 'Sent' : 'Received'}
             </Typography>
-            <Typography
-              size={12}
-              className="status-pill"
-              color={trx?.status?.confirmed ? '#ffffff' : 'yellow'}
-            >
-              {confirmations} confirmation{confirmations !== 1 ? 's' : ''}
+            <Typography size={14} className="trx-hash">
+              BTC trx:
+              <a
+                href={`https://mempool.space/${
+                  globalState?.isMainnet ? '' : 'testnet4/'
+                }tx/${trx.txid}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {trimHexAddress(trx.txid)}
+                <RedirectIcon className="redirect-icon" />
+              </a>
             </Typography>
           </FlexColumnWrapper>
-        </TrxRowWrapper>
-      ) : (
+        </FlexRowWrapper>
+
+        <FlexColumnWrapper className="info-column amount-status-wrapper">
+          <Typography
+            className="t-trx-amount"
+            size={14}
+            color={!isSent ? '#008462' : '#ff4a3d'}
+          >
+            {isSent ? '-' : '+'}
+            {isNaN(amount / 1e8)
+              ? '0'
+              : parseFloat((amount / 1e8).toFixed(8)).toString()}{' '}
+            BTC
+          </Typography>
+          <Typography
+            size={12}
+            className="status-pill"
+            color={trx?.status?.confirmed ? '#ffffff' : 'yellow'}
+          >
+            {confirmations} confirmation{confirmations !== 1 ? 's' : ''}
+          </Typography>
+        </FlexColumnWrapper>
+      </TrxRowWrapper>
+      {/* ) : (
         <div className="no-transactions">
           <Typography size={22} weight={500}>
             No transactions found 📭
           </Typography>
         </div>
-      )}
+      )} */}
       {isSent && isCctxModalOpen ? (
         <CCTXModal
           cctx={cctx}
